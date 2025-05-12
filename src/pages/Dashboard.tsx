@@ -1,6 +1,7 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import StatCard from "@/components/dashboard/StatCard";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, ListChecks, Calendar, BriefcaseBusiness, Mail, ArrowUpRight, CheckCircle2 } from "lucide-react";
 
