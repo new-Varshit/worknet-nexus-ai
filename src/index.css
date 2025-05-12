@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
+    --background: 0 0% 100%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
@@ -106,6 +106,14 @@
   
   .card-shadow {
     @apply shadow-md hover:shadow-lg transition-shadow duration-300;
+  }
+  
+  .card-gradient {
+    @apply bg-gradient-to-br from-card via-card to-muted/50;
+  }
+  
+  .btn-gradient {
+    @apply bg-gradient-to-br from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700;
   }
 }
 

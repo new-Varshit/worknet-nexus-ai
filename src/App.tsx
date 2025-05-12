@@ -9,8 +9,21 @@ import { ThemeProvider } from "@/contexts/ThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 
+import Index from "@/pages/Index";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
+import Employees from "@/pages/employees/Employees";
+import Tasks from "@/pages/tasks/Tasks";
+import Attendance from "@/pages/attendance/Attendance";
+import LeaveApply from "@/pages/leave/LeaveApply";
+import LeaveRequests from "@/pages/leave/LeaveRequests";
+import LeaveHistory from "@/pages/leave/LeaveHistory";
+import Payroll from "@/pages/payroll/Payroll";
+import JobPostings from "@/pages/recruitment/JobPostings";
+import Applications from "@/pages/recruitment/Applications";
+import InternalJobs from "@/pages/recruitment/InternalJobs";
+import Profile from "@/pages/Profile";
+import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
 import Unauthorized from "@/pages/Unauthorized";
 
@@ -26,46 +39,37 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               {/* Public routes */}
+              <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
               
               {/* Protected routes - all user types */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
               </Route>
               
               {/* Admin and HR specific routes */}
               <Route element={<ProtectedRoute allowedRoles={["admin", "hr"]} />}>
-                {/* These routes will be implemented later */}
-                <Route path="/employees" element={<Dashboard />} />
-                <Route path="/payroll" element={<Dashboard />} />
-                <Route path="/recruitment/jobs" element={<Dashboard />} />
-                <Route path="/recruitment/applications" element={<Dashboard />} />
-                <Route path="/leave/requests" element={<Dashboard />} />
-              </Route>
-              
-              {/* Admin only routes */}
-              <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-                {/* Admin exclusive routes */}
-              </Route>
-              
-              {/* HR only routes */}
-              <Route element={<ProtectedRoute allowedRoles={["hr"]} />}>
-                {/* HR exclusive routes */}
+                <Route path="/employees" element={<Employees />} />
+                <Route path="/payroll" element={<Payroll />} />
+                <Route path="/recruitment/jobs" element={<JobPostings />} />
+                <Route path="/recruitment/applications" element={<Applications />} />
+                <Route path="/leave/requests" element={<LeaveRequests />} />
               </Route>
               
               {/* Employee only routes */}
               <Route element={<ProtectedRoute allowedRoles={["employee"]} />}>
-                <Route path="/leave/apply" element={<Dashboard />} />
+                <Route path="/leave/apply" element={<LeaveApply />} />
               </Route>
 
               {/* All user routes */}
               <Route element={<ProtectedRoute allowedRoles={["admin", "hr", "employee"]} />}>
-                <Route path="/tasks" element={<Dashboard />} />
-                <Route path="/attendance" element={<Dashboard />} />
-                <Route path="/leave/history" element={<Dashboard />} />
-                <Route path="/recruitment/internal" element={<Dashboard />} />
+                <Route path="/tasks" element={<Tasks />} />
+                <Route path="/attendance" element={<Attendance />} />
+                <Route path="/leave/history" element={<LeaveHistory />} />
+                <Route path="/recruitment/internal" element={<InternalJobs />} />
               </Route>
               
               {/* Catch all */}

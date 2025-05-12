@@ -18,7 +18,7 @@ const Index = () => {
   }, [isAuthenticated, isLoading, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted">
       <div className="animate-pulse flex flex-col items-center">
         <h1 className="text-3xl font-bold text-brand-500">WorkNet360</h1>
         <p className="mt-2 text-muted-foreground">Loading...</p>
