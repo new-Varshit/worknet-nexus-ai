@@ -63,6 +63,20 @@ const AttendanceHistoryTable = () => {
     return format(date, "HH:mm");
   };
   
+  // Helper to get badge variant based on status
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case "Present":
+        return "default";
+      case "Half Day":
+        return "secondary"; // Changed from "warning" to "secondary"
+      case "Absent":
+        return "destructive";
+      default:
+        return "outline";
+    }
+  };
+  
   return (
     <Card className="card-gradient">
       <CardHeader className="pb-2">
@@ -128,13 +142,7 @@ const AttendanceHistoryTable = () => {
                   <TableCell>{formatTime(record.checkOut)}</TableCell>
                   <TableCell className="hidden sm:table-cell">{record.workHours} hours</TableCell>
                   <TableCell>
-                    <Badge 
-                      variant={
-                        record.status === "Present" ? "default" : 
-                        record.status === "Half Day" ? "warning" : 
-                        "destructive"
-                      }
-                    >
+                    <Badge variant={getStatusVariant(record.status)}>
                       {record.status}
                     </Badge>
                   </TableCell>

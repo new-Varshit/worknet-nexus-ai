@@ -159,6 +159,20 @@ const Employees = () => {
       .toUpperCase();
   };
   
+  // Helper function to get badge variant based on status
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case "Active":
+        return "default";
+      case "On Leave":
+        return "secondary"; // Changed from "warning" to "secondary"
+      case "Inactive":
+        return "outline";
+      default:
+        return "outline";
+    }
+  };
+  
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -233,7 +247,7 @@ const Employees = () => {
                     <TableCell className="hidden md:table-cell">{employee.department}</TableCell>
                     <TableCell className="hidden md:table-cell">{employee.position}</TableCell>
                     <TableCell className="hidden sm:table-cell">
-                      <Badge variant={employee.status === "Active" ? "default" : employee.status === "On Leave" ? "warning" : "secondary"}>
+                      <Badge variant={getStatusVariant(employee.status)}>
                         {employee.status}
                       </Badge>
                     </TableCell>

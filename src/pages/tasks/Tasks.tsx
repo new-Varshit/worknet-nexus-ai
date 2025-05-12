@@ -163,7 +163,7 @@ const Tasks = () => {
     
     // If user is admin or HR, show all tasks, otherwise only show tasks assigned to the user
     const matchesRole = user?.role === "admin" || user?.role === "hr" || 
-      (user?.id && task.assignedTo.id === user.id);
+      (user?.id && task.assignedTo.id === parseInt(user.id)); // Convert user.id to number for comparison
     
     return matchesSearch && matchesRole;
   });

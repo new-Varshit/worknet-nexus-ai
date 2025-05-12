@@ -11,6 +11,7 @@ interface User {
   role: UserRole;
   avatar?: string;
   department?: string;
+  position?: string;
 }
 
 interface AuthContextType {
@@ -33,6 +34,7 @@ const MOCK_USERS = [
     role: 'admin' as UserRole,
     avatar: '',
     department: 'Executive',
+    position: 'Chief Administrator',
   },
   {
     id: '2',
@@ -42,6 +44,7 @@ const MOCK_USERS = [
     role: 'hr' as UserRole,
     avatar: '',
     department: 'Human Resources',
+    position: 'HR Director',
   },
   {
     id: '3',
@@ -51,6 +54,7 @@ const MOCK_USERS = [
     role: 'employee' as UserRole,
     avatar: '',
     department: 'Engineering',
+    position: 'Software Developer',
   },
 ];
 
