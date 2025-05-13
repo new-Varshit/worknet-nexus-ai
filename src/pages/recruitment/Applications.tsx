@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,8 +38,35 @@ import {
 import { format } from "date-fns";
 import { toast } from "sonner";
 
+// Types
+type ApplicationStatus = "Applied" | "Screening" | "Interview" | "Offered" | "Hired" | "Rejected";
+
+type Application = {
+  id: number;
+  job: {
+    id: number;
+    title: string;
+    department: string;
+  };
+  applicant: {
+    name: string;
+    email: string;
+    phone: string;
+    avatar: string;
+  };
+  resumeUrl: string;
+  status: ApplicationStatus;
+  isInternalApplicant: boolean;
+  notes: {
+    text: string;
+    by: string;
+    date: string;
+  }[];
+  appliedDate: string;
+};
+
 // Mock application data
-const initialApplications = [
+const initialApplications: Application[] = [
   {
     id: 1,
     job: {
@@ -161,33 +187,6 @@ const initialApplications = [
     appliedDate: "2025-05-01"
   }
 ];
-
-// Types
-type ApplicationStatus = "Applied" | "Screening" | "Interview" | "Offered" | "Hired" | "Rejected";
-
-type Application = {
-  id: number;
-  job: {
-    id: number;
-    title: string;
-    department: string;
-  };
-  applicant: {
-    name: string;
-    email: string;
-    phone: string;
-    avatar: string;
-  };
-  resumeUrl: string;
-  status: ApplicationStatus;
-  isInternalApplicant: boolean;
-  notes: {
-    text: string;
-    by: string;
-    date: string;
-  }[];
-  appliedDate: string;
-};
 
 const Applications = () => {
   const [applications, setApplications] = useState<Application[]>(initialApplications);
