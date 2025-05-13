@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +17,7 @@ import {
   ChevronUp,
   ChevronDown,
   ArrowUpRight,
-  X as XCircle, // Import XCircle as alias of X
+  X as XCircle,
   Building,
   MapPin
 } from "lucide-react";
@@ -26,8 +25,49 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 
+// Define common types for different analytics properties
+interface CommonAnalyticsData {
+  employeeCount: number;
+  employeeChangeRate: number;
+  newHires: number;
+  currentAttendance: number;
+  attendancePercentage: number;
+  pendingLeaveRequests: number;
+  openPositions: number;
+  revenueGrowth: number;
+  costReduction: number;
+  monthlyRevenueData: Array<{ month: string; revenue: number }>;
+  salaryDistribution: Array<{ name: string; value: number }>;
+  performanceStats: Array<{ name: string; value: number }>;
+  tasksCompleted: number;
+  tasksInProgress: number;
+  upcomingDeadlines: number;
+  leaveDaysRemaining: number;
+  leavesApproved: number;
+  teamAttendance: number;
+  teamPerformance: number;
+  taskDistribution: Array<{ name: string; value: number }>;
+  recentActivities: Array<{ title: string; description: string; date: string }>;
+  applicationsToReview: number;
+  interviewsScheduled: number;
+  candidatesShortlisted: number;
+  attendanceData: Array<{ day: string; present: number; absent: number }>;
+  employeeDistribution: Array<{ name: string; value: number }>;
+}
+
+// Define role-specific analytics data interfaces
+interface AdminAnalyticsData extends CommonAnalyticsData {}
+interface HRAnalyticsData extends CommonAnalyticsData {}
+interface EmployeeAnalyticsData extends CommonAnalyticsData {}
+
+type AnalyticsDataByRole = {
+  admin: AdminAnalyticsData;
+  hr: HRAnalyticsData;
+  employee: EmployeeAnalyticsData;
+}
+
 // Analytics data based on user role
-const analyticsData = {
+const analyticsData: AnalyticsDataByRole = {
   admin: {
     employeeCount: 87,
     employeeChangeRate: 5.2,
@@ -59,6 +99,44 @@ const analyticsData = {
       { name: 'HR', value: 10 },
       { name: 'Finance', value: 15 },
       { name: 'Operations', value: 15 },
+    ],
+    // Employee role properties
+    tasksCompleted: 142,
+    tasksInProgress: 10,
+    upcomingDeadlines: 5,
+    leaveDaysRemaining: 15,
+    leavesApproved: 5,
+    teamAttendance: 95,
+    teamPerformance: 92,
+    taskDistribution: [
+      { name: 'Completed', value: 142 },
+      { name: 'In Progress', value: 10 },
+      { name: 'Todo', value: 12 },
+      { name: 'Blocked', value: 3 },
+    ],
+    recentActivities: [
+      { title: 'System Update', description: 'Updated system to version 2.1', date: '1 hour ago' },
+      { title: 'New Employee', description: 'Onboarded 2 new developers', date: '3 hours ago' },
+      { title: 'Financial Report', description: 'Q2 report review completed', date: '1 day ago' },
+      { title: 'Security Audit', description: 'Completed annual security audit', date: '2 days ago' },
+    ],
+    // HR role properties
+    applicationsToReview: 24,
+    interviewsScheduled: 5,
+    candidatesShortlisted: 13,
+    attendanceData: [
+      { day: 'Mon', present: 85, absent: 2 },
+      { day: 'Tue', present: 82, absent: 5 },
+      { day: 'Wed', present: 83, absent: 4 },
+      { day: 'Thu', present: 87, absent: 0 },
+      { day: 'Fri', present: 80, absent: 7 },
+    ],
+    employeeDistribution: [
+      { name: 'Engineering', value: 42 },
+      { name: 'Marketing', value: 15 },
+      { name: 'HR', value: 9 },
+      { name: 'Finance', value: 12 },
+      { name: 'Operations', value: 9 },
     ]
   },
   hr: {
@@ -85,7 +163,7 @@ const analyticsData = {
       { name: 'Finance', value: 12 },
       { name: 'Operations', value: 9 },
     ],
-    // Add these properties to match admin properties in common rendering sections
+    // Admin role properties
     openPositions: 12,
     revenueGrowth: 10.5,
     costReduction: 8.3,
@@ -109,6 +187,27 @@ const analyticsData = {
       { name: 'Good', value: 42 },
       { name: 'Average', value: 24 },
       { name: 'Below Avg', value: 9 },
+    ],
+    // Employee properties
+    completedTasks: 142,
+    tasksCompleted: 30,
+    tasksInProgress: 5,
+    upcomingDeadlines: 3,
+    leaveDaysRemaining: 18,
+    leavesApproved: 12,
+    teamAttendance: 93,
+    teamPerformance: 90,
+    taskDistribution: [
+      { name: 'Completed', value: 30 },
+      { name: 'In Progress', value: 5 },
+      { name: 'Todo', value: 8 },
+      { name: 'Blocked', value: 2 },
+    ],
+    recentActivities: [
+      { title: 'Interview Scheduled', description: 'Senior Developer interview set for tomorrow', date: '2 hours ago' },
+      { title: 'Leave Approved', description: 'Approved leave request for John Smith', date: '4 hours ago' },
+      { title: 'New Application', description: 'Received 5 new job applications', date: '1 day ago' },
+      { title: 'Performance Review', description: 'Completed Q2 performance reviews', date: '3 days ago' },
     ]
   },
   employee: {
@@ -132,12 +231,54 @@ const analyticsData = {
       { title: 'New Task', description: 'Create wireframes for mobile app', date: '2 days ago' },
       { title: 'Performance Review', description: 'Scheduled for next week', date: '3 days ago' },
     ],
-    // Add empty placeholder properties for type safety
-    employeeCount: 0,
+    // Add all missing properties needed by other roles
+    employeeCount: 87,
     employeeChangeRate: 0,
     newHires: 0,
-    currentAttendance: 0,
-    pendingLeaveRequests: 0
+    currentAttendance: 1,
+    pendingLeaveRequests: 0,
+    completedTasks: 16,
+    openPositions: 0,
+    revenueGrowth: 0,
+    costReduction: 0,
+    monthlyRevenueData: [
+      { month: 'Jan', revenue: 0 },
+      { month: 'Feb', revenue: 0 },
+      { month: 'Mar', revenue: 0 },
+      { month: 'Apr', revenue: 0 },
+      { month: 'May', revenue: 0 },
+      { month: 'Jun', revenue: 0 },
+    ],
+    salaryDistribution: [
+      { name: 'Engineering', value: 0 },
+      { name: 'Marketing', value: 0 },
+      { name: 'HR', value: 0 },
+      { name: 'Finance', value: 0 },
+      { name: 'Operations', value: 0 },
+    ],
+    performanceStats: [
+      { name: 'Excellent', value: 0 },
+      { name: 'Good', value: 0 },
+      { name: 'Average', value: 0 },
+      { name: 'Below Avg', value: 0 },
+    ],
+    applicationsToReview: 0,
+    interviewsScheduled: 0,
+    candidatesShortlisted: 0,
+    attendanceData: [
+      { day: 'Mon', present: 0, absent: 0 },
+      { day: 'Tue', present: 0, absent: 0 },
+      { day: 'Wed', present: 0, absent: 0 },
+      { day: 'Thu', present: 0, absent: 0 },
+      { day: 'Fri', present: 0, absent: 0 },
+    ],
+    employeeDistribution: [
+      { name: 'Engineering', value: 0 },
+      { name: 'Marketing', value: 0 },
+      { name: 'HR', value: 0 },
+      { name: 'Finance', value: 0 },
+      { name: 'Operations', value: 0 },
+    ]
   }
 };
 
@@ -608,544 +749,4 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="bg-muted/40 rounded-lg p-4">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-medium">Software Developer</h4>
-                    <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-200">
-                      10 applicants
-                    </Badge>
-                  </div>
-                  <div className="mt-2 flex flex-col sm:flex-row sm:items-center text-sm">
-                    <div className="flex items-center gap-1">
-                      <Building className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Engineering</span>
-                    </div>
-                    <span className="hidden sm:inline text-muted-foreground mx-2">•</span>
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Remote</span>
-                    </div>
-                    <span className="hidden sm:inline text-muted-foreground mx-2">•</span>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Closes June 30</span>
-                    </div>
-                  </div>
-                  <div className="mt-3">
-                    <div className="w-full bg-muted rounded-full h-2.5 mt-2">
-                      <div className="bg-primary h-2.5 rounded-full" style={{ width: "60%" }}></div>
-                    </div>
-                    <div className="flex justify-between text-xs mt-1">
-                      <span className="text-muted-foreground">Interview stage</span>
-                      <span className="font-medium">60%</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-muted/40 rounded-lg p-4">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-medium">Product Manager</h4>
-                    <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-200">
-                      7 applicants
-                    </Badge>
-                  </div>
-                  <div className="mt-2 flex flex-col sm:flex-row sm:items-center text-sm">
-                    <div className="flex items-center gap-1">
-                      <Building className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Product</span>
-                    </div>
-                    <span className="hidden sm:inline text-muted-foreground mx-2">•</span>
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">New York</span>
-                    </div>
-                    <span className="hidden sm:inline text-muted-foreground mx-2">•</span>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Closes July 15</span>
-                    </div>
-                  </div>
-                  <div className="mt-3">
-                    <div className="w-full bg-muted rounded-full h-2.5 mt-2">
-                      <div className="bg-primary h-2.5 rounded-full" style={{ width: "30%" }}></div>
-                    </div>
-                    <div className="flex justify-between text-xs mt-1">
-                      <span className="text-muted-foreground">Screening stage</span>
-                      <span className="font-medium">30%</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-muted/40 rounded-lg p-4">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-medium">Marketing Specialist</h4>
-                    <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-200">
-                      5 applicants
-                    </Badge>
-                  </div>
-                  <div className="mt-2 flex flex-col sm:flex-row sm:items-center text-sm">
-                    <div className="flex items-center gap-1">
-                      <Building className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Marketing</span>
-                    </div>
-                    <span className="hidden sm:inline text-muted-foreground mx-2">•</span>
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Chicago</span>
-                    </div>
-                    <span className="hidden sm:inline text-muted-foreground mx-2">•</span>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Closes June 15</span>
-                    </div>
-                  </div>
-                  <div className="mt-3">
-                    <div className="w-full bg-muted rounded-full h-2.5 mt-2">
-                      <div className="bg-primary h-2.5 rounded-full" style={{ width: "80%" }}></div>
-                    </div>
-                    <div className="flex justify-between text-xs mt-1">
-                      <span className="text-muted-foreground">Final stage</span>
-                      <span className="font-medium">80%</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="pt-4">
-                <Button variant="outline" className="w-full">
-                  View All Openings
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-sm border-0">
-            <CardHeader>
-              <div className="flex justify-between">
-                <CardTitle>Pending Leave Approvals</CardTitle>
-                <Badge>{roleBasedData.pendingLeaveRequests}</Badge>
-              </div>
-              <CardDescription>Leave requests needing your approval</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="bg-muted/40 rounded-lg p-4 flex items-start justify-between">
-                  <div className="flex gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src="https://github.com/shadcn.png" />
-                      <AvatarFallback>JD</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">John Doe</p>
-                      <p className="text-sm text-muted-foreground">Medical Leave: June 15-20</p>
-                      <div className="flex items-center gap-1 mt-1">
-                        <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-200">
-                          5 days
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">Requested on June 1</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="h-8">
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Deny
-                    </Button>
-                    <Button size="sm" className="h-8">
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
-                      Approve
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="bg-muted/40 rounded-lg p-4 flex items-start justify-between">
-                  <div className="flex gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src="https://github.com/shadcn.png" />
-                      <AvatarFallback>AS</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">Anna Smith</p>
-                      <p className="text-sm text-muted-foreground">Personal Leave: June 12</p>
-                      <div className="flex items-center gap-1 mt-1">
-                        <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-200">
-                          1 day
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">Requested on June 5</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="h-8">
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Deny
-                    </Button>
-                    <Button size="sm" className="h-8">
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
-                      Approve
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="bg-muted/40 rounded-lg p-4 flex items-start justify-between">
-                  <div className="flex gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src="https://github.com/shadcn.png" />
-                      <AvatarFallback>RJ</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">Robert Johnson</p>
-                      <p className="text-sm text-muted-foreground">Vacation: July 1-7</p>
-                      <div className="flex items-center gap-1 mt-1">
-                        <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-200">
-                          7 days
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">Requested on June 3</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="h-8">
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Deny
-                    </Button>
-                    <Button size="sm" className="h-8">
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
-                      Approve
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              <div className="pt-4">
-                <Button variant="outline" className="w-full">
-                  View All Requests
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  } else {
-    // Employee Dashboard
-    return (
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-start mb-6">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Good {timeOfDay}, {user?.name}</h1>
-            <p className="text-muted-foreground mt-1">
-              Here's your personal dashboard
-            </p>
-          </div>
-        </div>
-
-        {/* Employee Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <BarChart3 className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg font-medium">Tasks</CardTitle>
-              </div>
-              <Badge className="font-normal">{roleBasedData.tasksInProgress} in progress</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{roleBasedData.tasksCompleted}</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Completed this month
-              </p>
-              <Progress 
-                value={(roleBasedData.tasksCompleted / (roleBasedData.tasksCompleted + roleBasedData.tasksInProgress + 3)) * 100} 
-                className="h-2 mt-3" 
-              />
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Clock className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg font-medium">Attendance</CardTitle>
-              </div>
-              <Badge className="font-normal">{roleBasedData.attendancePercentage}%</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center h-12">
-                <div className="text-center">
-                  <svg className="inline-block h-10 w-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  <p className="text-sm mt-1">Present today</p>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-3 text-center">
-                Last check-in: 9:05 AM
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Calendar className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg font-medium">Leave</CardTitle>
-              </div>
-              <Badge variant="outline" className="font-normal">{roleBasedData.leavesApproved} approved</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{roleBasedData.leaveDaysRemaining}</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Days remaining
-              </p>
-              <div className="mt-3 flex items-center text-xs text-muted-foreground">
-                <Calendar className="h-3 w-3 mr-1" />
-                <span>Next holiday: Independence Day (July 4)</span>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <BriefcaseBusiness className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg font-medium">Job Board</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">3</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Internal opportunities
-              </p>
-              <div className="mt-3 flex items-center text-xs text-primary">
-                <ArrowUpRight className="h-3 w-3 mr-1" />
-                <span>1 matches your profile</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Employee's Task Distribution & Recent Activities */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <Card className="shadow-sm border-0">
-            <CardHeader>
-              <CardTitle>Task Distribution</CardTitle>
-              <CardDescription>Your current work items</CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center">
-              <div className="h-[250px] w-full flex flex-col items-center justify-center">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={roleBasedData.taskDistribution}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}`}
-                    >
-                      {roleBasedData.taskDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => [`${value} tasks`, 'Count']} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader>
-              <CardTitle>Recent Activities</CardTitle>
-              <CardDescription>Your latest updates and actions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {roleBasedData.recentActivities.map((activity, idx) => (
-                  <div key={idx} className="flex gap-3">
-                    <div className="relative">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full border border-primary/10 bg-primary/10">
-                        {idx === 0 && <FileText className="h-4 w-4 text-primary" />}
-                        {idx === 1 && <CheckCircle2 className="h-4 w-4 text-primary" />}
-                        {idx === 2 && <BriefcaseBusiness className="h-4 w-4 text-primary" />}
-                        {idx === 3 && <BarChart3 className="h-4 w-4 text-primary" />}
-                      </div>
-                      {idx < roleBasedData.recentActivities.length - 1 && (
-                        <div className="absolute left-1/2 top-8 h-full w-px -translate-x-1/2 bg-border" />
-                      )}
-                    </div>
-                    <div className="flex flex-col pb-6">
-                      <p className="font-medium text-sm">{activity.title}</p>
-                      <p className="text-sm text-muted-foreground">{activity.description}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{activity.date}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Deadlines & Team Stats */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <Card className="shadow-sm border-0">
-            <CardHeader>
-              <div className="flex justify-between">
-                <CardTitle>Upcoming Deadlines</CardTitle>
-                <Badge>{roleBasedData.upcomingDeadlines}</Badge>
-              </div>
-              <CardDescription>Tasks due soon</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="bg-muted/40 rounded-lg p-4">
-                  <div className="flex justify-between">
-                    <h4 className="font-medium">Complete Project Documentation</h4>
-                    <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-200">1 day left</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Finalize all documentation for the product launch
-                  </p>
-                  <div className="mt-3">
-                    <div className="w-full bg-muted rounded-full h-2.5 mt-2">
-                      <div className="bg-red-500 h-2.5 rounded-full" style={{ width: "70%" }}></div>
-                    </div>
-                    <div className="flex justify-between text-xs mt-1">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="font-medium">70%</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-muted/40 rounded-lg p-4">
-                  <div className="flex justify-between">
-                    <h4 className="font-medium">Prepare Sales Presentation</h4>
-                    <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-200">3 days left</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Create slides for the quarterly review meeting
-                  </p>
-                  <div className="mt-3">
-                    <div className="w-full bg-muted rounded-full h-2.5 mt-2">
-                      <div className="bg-amber-500 h-2.5 rounded-full" style={{ width: "40%" }}></div>
-                    </div>
-                    <div className="flex justify-between text-xs mt-1">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="font-medium">40%</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <Button variant="outline" className="w-full">
-                  View All Tasks
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-sm border-0">
-            <CardHeader>
-              <div className="flex justify-between">
-                <CardTitle>Team Stats</CardTitle>
-                <div className="flex items-center gap-1">
-                  <span className="text-sm text-muted-foreground">Your team: </span>
-                  <Badge variant="outline">Product Design</Badge>
-                </div>
-              </div>
-              <CardDescription>Team performance metrics</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Team Attendance</span>
-                    <div className="flex items-center">
-                      <span className="font-medium">{roleBasedData.teamAttendance}%</span>
-                      <ChevronUp className="text-green-500 ml-1 h-4 w-4" />
-                    </div>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2.5">
-                    <div className="bg-primary h-2.5 rounded-full" style={{ width: `${roleBasedData.teamAttendance}%` }}></div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Team Performance</span>
-                    <div className="flex items-center">
-                      <span className="font-medium">{roleBasedData.teamPerformance}%</span>
-                      <ChevronUp className="text-green-500 ml-1 h-4 w-4" />
-                    </div>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2.5">
-                    <div className="bg-primary h-2.5 rounded-full" style={{ width: `${roleBasedData.teamPerformance}%` }}></div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Project Milestones</span>
-                    <div className="flex items-center">
-                      <span className="font-medium">76%</span>
-                      <ChevronDown className="text-red-500 ml-1 h-4 w-4" />
-                    </div>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2.5">
-                    <div className="bg-primary h-2.5 rounded-full" style={{ width: "76%" }}></div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Deadline Adherence</span>
-                    <div className="flex items-center">
-                      <span className="font-medium">92%</span>
-                      <ChevronUp className="text-green-500 ml-1 h-4 w-4" />
-                    </div>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2.5">
-                    <div className="bg-primary h-2.5 rounded-full" style={{ width: "92%" }}></div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="pt-6 mt-4 border-t">
-                <h4 className="font-medium mb-2">Team Members</h4>
-                <div className="flex -space-x-2">
-                  <Avatar className="border-2 border-background h-8 w-8">
-                    <AvatarFallback>JD</AvatarFallback>
-                  </Avatar>
-                  <Avatar className="border-2 border-background h-8 w-8">
-                    <AvatarFallback>AS</AvatarFallback>
-                  </Avatar>
-                  <Avatar className="border-2 border-background h-8 w-8">
-                    <AvatarFallback>RJ</AvatarFallback>
-                  </Avatar>
-                  <Avatar className="border-2 border-background h-8 w-8">
-                    <AvatarFallback>TK</AvatarFallback>
-                  </Avatar>
-                  <Avatar className="border-2 border-background h-8 w-8">
-                    <AvatarFallback>+3</AvatarFallback>
-                  </Avatar>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-};
-
-export default Dashboard;
+                <
