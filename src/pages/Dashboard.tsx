@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -806,4 +807,322 @@ const Dashboard = () => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Tasks Completed"
+          value={(data as EmployeeAnalyticsData).tasksCompleted}
+          description="This month"
+          icon={<CheckCircle2 className="h-5 w-5" />}
+          onClick={() => navigate("/tasks")}
+        />
+        <StatCard
+          title="Tasks In Progress"
+          value={(data as EmployeeAnalyticsData).tasksInProgress}
+          description="Assigned to you"
+          icon={<Clock className="h-5 w-5" />}
+          onClick={() => navigate("/tasks")}
+        />
+        <StatCard
+          title="Leave Balance"
+          value={(data as EmployeeAnalyticsData).leaveDaysRemaining}
+          description="Days remaining"
+          icon={<Calendar className="h-5 w-5" />}
+          onClick={() => navigate("/leave/apply")}
+        />
+        <StatCard
+          title="Attendance"
+          value={`${(data as EmployeeAnalyticsData).attendancePercentage}%`}
+          description={`Streak: ${(data as EmployeeAnalyticsData).attendanceStreak} days`}
+          icon={<User className="h-5 w-5" />}
+          onClick={() => navigate("/attendance")}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Task Progress</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <div>Overall Progress</div>
+                <div className="font-medium">{(data as EmployeeAnalyticsData).taskProgress}%</div>
+              </div>
+              <Progress value={(data as EmployeeAnalyticsData).taskProgress} className="h-2" />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1 text-sm">
+                  <CircleCheck className="h-4 w-4 text-green-500" />
+                  <span>Completed</span>
+                </div>
+                <div className="text-2xl font-bold">{(data as EmployeeAnalyticsData).tasksCompleted}</div>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1 text-sm">
+                  <CircleDashed className="h-4 w-4 text-orange-500" />
+                  <span>In Progress</span>
+                </div>
+                <div className="text-2xl font-bold">{(data as EmployeeAnalyticsData).tasksInProgress}</div>
+              </div>
+            </div>
+            
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm font-medium">Upcoming Deadlines</div>
+                <Badge variant="outline">{(data as EmployeeAnalyticsData).upcomingDeadlines}</Badge>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-red-500"></div>
+                    <span>Project Milestone</span>
+                  </div>
+                  <div>Tomorrow</div>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-amber-500"></div>
+                    <span>Report Submission</span>
+                  </div>
+                  <div>In 2 days</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/tasks")}>
+              View All Tasks
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Leave & Attendance</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">Leave Balance</div>
+                <div className="text-2xl font-bold">{(data as EmployeeAnalyticsData).leaveDaysRemaining}</div>
+                <div className="text-xs text-muted-foreground">days remaining</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">Leaves Approved</div>
+                <div className="text-2xl font-bold">{(data as EmployeeAnalyticsData).leavesApproved}</div>
+                <div className="text-xs text-muted-foreground">this month</div>
+              </div>
+            </div>
+            
+            <div className="space-y-2 pt-2">
+              <div className="flex items-center justify-between text-sm">
+                <div>Attendance Rate</div>
+                <div className="font-medium">{(data as EmployeeAnalyticsData).attendancePercentage}%</div>
+              </div>
+              <Progress value={(data as EmployeeAnalyticsData).attendancePercentage} className="h-2" />
+              <div className="text-xs text-muted-foreground">
+                Current streak: {(data as EmployeeAnalyticsData).attendanceStreak} days
+              </div>
+            </div>
+            
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm font-medium">Team Attendance</div>
+                <div className="text-sm font-medium">{(data as EmployeeAnalyticsData).teamAttendance}%</div>
+              </div>
+              <Progress value={(data as EmployeeAnalyticsData).teamAttendance} className="h-2" />
+            </div>
+          </CardContent>
+          <CardFooter className="flex gap-2">
+            <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate("/leave/apply")}>
+              Apply for Leave
+            </Button>
+            <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate("/attendance")}>
+              View Attendance
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Upcoming Review</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {(data as EmployeeAnalyticsData).upcomingReview ? (
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                  <Calendar className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium">Performance Review</div>
+                  <div className="text-sm text-muted-foreground">Scheduled for {(data as EmployeeAnalyticsData).upcomingReview}</div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
+                  <Calendar className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium">No Upcoming Reviews</div>
+                  <div className="text-sm text-muted-foreground">You'll be notified when one is scheduled</div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Payroll Status</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                <DollarSign className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <div className="font-medium">Last Payroll</div>
+                <div className="text-sm text-muted-foreground">{(data as EmployeeAnalyticsData).payrollStatus}</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="shadow-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Internal Opportunities</CardTitle>
+          <CardDescription>Open positions you can apply for</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium">Available Internal Positions</div>
+              <Badge>{(data as EmployeeAnalyticsData).internalJobsOpen}</Badge>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <Briefcase className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="font-medium">Senior Developer</div>
+                    <div className="text-xs text-muted-foreground">Engineering • Full Time</div>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" className="gap-1" onClick={() => navigate("/recruitment/internal")}>
+                  View
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <Building className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="font-medium">Project Manager</div>
+                    <div className="text-xs text-muted-foreground">Operations • Full Time</div>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" className="gap-1" onClick={() => navigate("/recruitment/internal")}>
+                  View
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/recruitment/internal")}>
+            View All Openings
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
+  );
+
+  return (
+    <div className="container mx-auto py-6 space-y-8">
+      <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome back, {user?.name || "User"}!
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => navigate("/tasks")}>
+            <FileCheck className="mr-2 h-4 w-4" />
+            Tasks
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => navigate("/attendance")}>
+            <User className="mr-2 h-4 w-4" />
+            Attendance
+          </Button>
+        </div>
+      </div>
+
+      <Tabs defaultValue="overview" className="space-y-6" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-4">
+          {user?.role === 'admin' && <AdminDashboard />}
+          {user?.role === 'hr' && <HRDashboard />}
+          {user?.role === 'employee' && <EmployeeDashboard />}
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Performance Analytics</CardTitle>
+              <CardDescription>View detailed performance metrics and trends</CardDescription>
+            </CardHeader>
+            <CardContent className="h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={[
+                    { name: 'Jan', value: 65 },
+                    { name: 'Feb', value: 70 },
+                    { name: 'Mar', value: 62 },
+                    { name: 'Apr', value: 75 },
+                    { name: 'May', value: 80 },
+                    { name: 'Jun', value: 85 },
+                  ]}
+                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#0088FE" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#0088FE" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <Tooltip />
+                  <Area type="monotone" dataKey="value" stroke="#0088FE" fillOpacity={1} fill="url(#colorValue)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
+export default Dashboard;
