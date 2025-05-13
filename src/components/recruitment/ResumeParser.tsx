@@ -187,21 +187,19 @@ const ResumeParser = () => {
                     or click to browse (PDF or Word document, max 5MB)
                   </p>
                 </div>
-                <Button
-                  as="label"
-                  htmlFor="resume-upload"
-                  className="cursor-pointer"
-                >
-                  <FileText className="mr-2 h-4 w-4" />
-                  Select Resume
-                </Button>
-                <input
-                  type="file"
-                  id="resume-upload"
-                  accept=".pdf,.doc,.docx"
-                  className="hidden"
-                  onChange={handleFileInputChange}
-                />
+                <div>
+                  <Button className="cursor-pointer" onClick={() => document.getElementById("resume-upload")?.click()}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    Select Resume
+                  </Button>
+                  <input
+                    type="file"
+                    id="resume-upload"
+                    accept=".pdf,.doc,.docx"
+                    className="hidden"
+                    onChange={handleFileInputChange}
+                  />
+                </div>
               </div>
             </div>
           ) : (

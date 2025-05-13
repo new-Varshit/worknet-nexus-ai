@@ -17,7 +17,10 @@ import {
   AlertCircle,
   ChevronUp,
   ChevronDown,
-  ArrowUpRight
+  ArrowUpRight,
+  X as XCircle, // Import XCircle as alias of X
+  Building,
+  MapPin
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -81,6 +84,31 @@ const analyticsData = {
       { name: 'HR', value: 9 },
       { name: 'Finance', value: 12 },
       { name: 'Operations', value: 9 },
+    ],
+    // Add these properties to match admin properties in common rendering sections
+    openPositions: 12,
+    revenueGrowth: 10.5,
+    costReduction: 8.3,
+    monthlyRevenueData: [
+      { month: 'Jan', revenue: 40000 },
+      { month: 'Feb', revenue: 45000 },
+      { month: 'Mar', revenue: 42000 },
+      { month: 'Apr', revenue: 50000 },
+      { month: 'May', revenue: 48000 },
+      { month: 'Jun', revenue: 55000 },
+    ],
+    salaryDistribution: [
+      { name: 'Engineering', value: 40 },
+      { name: 'Marketing', value: 18 },
+      { name: 'HR', value: 12 },
+      { name: 'Finance', value: 15 },
+      { name: 'Operations', value: 15 },
+    ],
+    performanceStats: [
+      { name: 'Excellent', value: 25 },
+      { name: 'Good', value: 42 },
+      { name: 'Average', value: 24 },
+      { name: 'Below Avg', value: 9 },
     ]
   },
   employee: {
@@ -103,7 +131,13 @@ const analyticsData = {
       { title: 'Leave Approved', description: 'Your leave for June 15-16 was approved', date: '1 day ago' },
       { title: 'New Task', description: 'Create wireframes for mobile app', date: '2 days ago' },
       { title: 'Performance Review', description: 'Scheduled for next week', date: '3 days ago' },
-    ]
+    ],
+    // Add empty placeholder properties for type safety
+    employeeCount: 0,
+    employeeChangeRate: 0,
+    newHires: 0,
+    currentAttendance: 0,
+    pendingLeaveRequests: 0
   }
 };
 
