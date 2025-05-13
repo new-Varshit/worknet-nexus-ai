@@ -59,7 +59,7 @@ const mockNotifications: Notification[] = [
   {
     id: 3,
     title: "New task assigned",
-    description: "Sam assigned you a new task: "Update employee records"",
+    description: "Sam assigned you a new task: 'Update employee records'",
     icon: <FileText className="h-4 w-4 text-primary" />,
     time: "1 hour ago",
     isRead: true
@@ -75,7 +75,7 @@ const mockNotifications: Notification[] = [
   {
     id: 5,
     title: "New job posting",
-    description: "A new internal position for "Senior Developer" is available",
+    description: "A new internal position for 'Senior Developer' is available",
     icon: <Briefcase className="h-4 w-4 text-blue-500" />,
     time: "1 day ago",
     isRead: true
