@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +54,7 @@ interface CommonAnalyticsData {
   candidatesShortlisted: number;
   attendanceData: Array<{ day: string; present: number; absent: number }>;
   employeeDistribution: Array<{ name: string; value: number }>;
+  completedTasks: number;
 }
 
 // Define role-specific analytics data interfaces
@@ -749,4 +751,414 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <
+                <div className="bg-muted/40 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-500/10 rounded-lg">
+                        <Building className="h-5 w-5 text-blue-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Senior Developer</p>
+                        <p className="text-sm text-muted-foreground">Engineering • Full-time</p>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-200">
+                      8 applicants
+                    </Badge>
+                  </div>
+                  <div className="mt-3">
+                    <p className="text-sm text-muted-foreground">4 candidates shortlisted, 2 interviews scheduled</p>
+                  </div>
+                </div>
+                
+                <div className="bg-muted/40 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-amber-500/10 rounded-lg">
+                        <Building className="h-5 w-5 text-amber-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium">UI/UX Designer</p>
+                        <p className="text-sm text-muted-foreground">Design • Full-time</p>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-200">
+                      12 applicants
+                    </Badge>
+                  </div>
+                  <div className="mt-3">
+                    <p className="text-sm text-muted-foreground">6 candidates shortlisted, 3 interviews scheduled</p>
+                  </div>
+                </div>
+                
+                <div className="bg-muted/40 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-500/10 rounded-lg">
+                        <Building className="h-5 w-5 text-green-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium">HR Coordinator</p>
+                        <p className="text-sm text-muted-foreground">Human Resources • Part-time</p>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-200">
+                      4 applicants
+                    </Badge>
+                  </div>
+                  <div className="mt-3">
+                    <p className="text-sm text-muted-foreground">3 candidates shortlisted, 1 interview scheduled</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-sm border-0">
+            <CardHeader>
+              <div className="flex justify-between">
+                <CardTitle>Leave Requests</CardTitle>
+                <Badge>{roleBasedData.pendingLeaveRequests}</Badge>
+              </div>
+              <CardDescription>Pending leave approvals</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="bg-muted/40 rounded-lg p-4 flex items-start justify-between">
+                  <div className="flex gap-3">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src="https://github.com/shadcn.png" />
+                      <AvatarFallback>JD</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">John Doe</p>
+                      <p className="text-sm text-muted-foreground">June 15-20 (5 days) • Medical</p>
+                      <div className="flex items-center mt-1">
+                        <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Engineering</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="h-8">
+                      <XCircle className="h-4 w-4 mr-1" />
+                      Deny
+                    </Button>
+                    <Button size="sm" className="h-8">
+                      <CheckCircle2 className="h-4 w-4 mr-1" />
+                      Approve
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="bg-muted/40 rounded-lg p-4 flex items-start justify-between">
+                  <div className="flex gap-3">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src="https://github.com/shadcn.png" />
+                      <AvatarFallback>AS</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">Anna Smith</p>
+                      <p className="text-sm text-muted-foreground">June 12 (1 day) • Personal</p>
+                      <div className="flex items-center mt-1">
+                        <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Marketing</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="h-8">
+                      <XCircle className="h-4 w-4 mr-1" />
+                      Deny
+                    </Button>
+                    <Button size="sm" className="h-8">
+                      <CheckCircle2 className="h-4 w-4 mr-1" />
+                      Approve
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="bg-muted/40 rounded-lg p-4 flex items-start justify-between">
+                  <div className="flex gap-3">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src="https://github.com/shadcn.png" />
+                      <AvatarFallback>RJ</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">Robert Johnson</p>
+                      <p className="text-sm text-muted-foreground">June 22-23 (2 days) • Vacation</p>
+                      <div className="flex items-center mt-1">
+                        <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Finance</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="h-8">
+                      <XCircle className="h-4 w-4 mr-1" />
+                      Deny
+                    </Button>
+                    <Button size="sm" className="h-8">
+                      <CheckCircle2 className="h-4 w-4 mr-1" />
+                      Approve
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  } else {
+    // Default Employee Dashboard
+    return (
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex flex-col md:flex-row justify-between items-start mb-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Good {timeOfDay}, {user?.name}</h1>
+            <p className="text-muted-foreground mt-1">
+              Here's your work summary for today
+            </p>
+          </div>
+        </div>
+        
+        {/* Employee Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="shadow-sm border-0">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div className="flex items-center space-x-2">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <FileText className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle className="text-lg font-medium">Tasks</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{roleBasedData.tasksInProgress}</div>
+              <p className="text-sm text-muted-foreground mt-1">
+                In progress
+              </p>
+              <div className="mt-3 flex items-center text-xs text-muted-foreground">
+                <CheckCircle2 className="h-3 w-3 mr-1 text-green-500" />
+                <span>{roleBasedData.tasksCompleted} completed this week</span>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-sm border-0">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div className="flex items-center space-x-2">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Calendar className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle className="text-lg font-medium">Time Off</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{roleBasedData.leaveDaysRemaining}</div>
+              <p className="text-sm text-muted-foreground mt-1">
+                Days available
+              </p>
+              <div className="mt-3 flex items-center text-xs text-muted-foreground">
+                <CheckCircle2 className="h-3 w-3 mr-1 text-green-500" />
+                <span>{roleBasedData.leavesApproved} days approved</span>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-sm border-0">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div className="flex items-center space-x-2">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Clock className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle className="text-lg font-medium">Deadlines</CardTitle>
+              </div>
+              {roleBasedData.upcomingDeadlines > 0 && (
+                <Badge variant="outline" className="font-normal bg-amber-500/10 text-amber-500 border-amber-200">
+                  {roleBasedData.upcomingDeadlines}
+                </Badge>
+              )}
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{roleBasedData.upcomingDeadlines}</div>
+              <p className="text-sm text-muted-foreground mt-1">
+                Due this week
+              </p>
+              <div className="mt-3 flex items-center text-xs text-muted-foreground">
+                <AlertCircle className="h-3 w-3 mr-1 text-amber-500" />
+                <span>Highest priority: UI design</span>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-sm border-0">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div className="flex items-center space-x-2">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Users className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle className="text-lg font-medium">Team</CardTitle>
+              </div>
+              <Badge className="font-normal">{roleBasedData.teamAttendance}%</Badge>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{roleBasedData.teamPerformance}%</div>
+              <p className="text-sm text-muted-foreground mt-1">
+                Performance
+              </p>
+              <Progress 
+                value={roleBasedData.teamPerformance} 
+                className="h-2 mt-3" 
+              />
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Employee Tasks & Activities */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <Card className="shadow-sm border-0 col-span-1 lg:col-span-2">
+            <CardHeader>
+              <CardTitle>My Tasks</CardTitle>
+              <CardDescription>Your assigned and upcoming tasks</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="bg-muted/40 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Update user documentation</p>
+                      <div className="flex items-center mt-1">
+                        <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Due in 2 days</span>
+                      </div>
+                    </div>
+                    <Badge className="bg-green-500/10 text-green-500 border-green-200">
+                      In progress
+                    </Badge>
+                  </div>
+                  <div className="mt-3">
+                    <Progress value={75} className="h-2" />
+                    <p className="text-xs text-muted-foreground mt-1">75% completed</p>
+                  </div>
+                </div>
+                
+                <div className="bg-muted/40 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Create wireframes for mobile app</p>
+                      <div className="flex items-center mt-1">
+                        <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Due tomorrow</span>
+                      </div>
+                    </div>
+                    <Badge className="bg-amber-500/10 text-amber-500 border-amber-200">
+                      In progress
+                    </Badge>
+                  </div>
+                  <div className="mt-3">
+                    <Progress value={30} className="h-2" />
+                    <p className="text-xs text-muted-foreground mt-1">30% completed</p>
+                  </div>
+                </div>
+                
+                <div className="bg-muted/40 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Review code for project X</p>
+                      <div className="flex items-center mt-1">
+                        <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Due in 3 days</span>
+                      </div>
+                    </div>
+                    <Badge className="bg-slate-500/10 text-slate-500 border-slate-200">
+                      Not started
+                    </Badge>
+                  </div>
+                  <div className="mt-3">
+                    <Progress value={0} className="h-2" />
+                    <p className="text-xs text-muted-foreground mt-1">Not started yet</p>
+                  </div>
+                </div>
+                
+                <div className="bg-muted/40 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Update company profile page</p>
+                      <div className="flex items-center mt-1">
+                        <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Due in 5 days</span>
+                      </div>
+                    </div>
+                    <Badge className="bg-blue-500/10 text-blue-500 border-blue-200">
+                      Planning
+                    </Badge>
+                  </div>
+                  <div className="mt-3">
+                    <Progress value={10} className="h-2" />
+                    <p className="text-xs text-muted-foreground mt-1">10% completed</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <div className="space-y-6">
+            <Card className="shadow-sm border-0">
+              <CardHeader>
+                <CardTitle>Task Distribution</CardTitle>
+                <CardDescription>Your current workload</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[180px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={roleBasedData.taskDistribution}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={70}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, value }) => `${name}: ${value}`}
+                      >
+                        {roleBasedData.taskDistribution.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value) => [`${value} tasks`, 'Count']} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="shadow-sm border-0">
+              <CardHeader>
+                <CardTitle>Recent Activities</CardTitle>
+                <CardDescription>Your latest updates</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {roleBasedData.recentActivities.map((activity, index) => (
+                    <div className="flex items-start space-x-3" key={index}>
+                      <div className="h-2 w-2 rounded-full bg-primary mt-2"></div>
+                      <div>
+                        <p className="font-medium text-sm">{activity.title}</p>
+                        <p className="text-xs text-muted-foreground">{activity.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{activity.date}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+};
+
+export default Dashboard;
