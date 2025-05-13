@@ -1,1164 +1,1131 @@
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { 
-  Users, 
-  Clock, 
-  BarChart3, 
-  FileText, 
-  BriefcaseBusiness, 
-  Calendar, 
-  DollarSign, 
-  ChevronRight, 
-  CheckCircle2, 
-  AlertCircle,
-  ChevronUp,
-  ChevronDown,
-  ArrowUpRight,
-  X as XCircle,
-  Building,
-  MapPin
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { 
+  ArrowUpRight, Users, UserPlus, Briefcase, Calendar, CheckCircle2, Clock, 
+  FileText, BarChart, PieChart, DollarSign, TrendingUp, TrendingDown, 
+  FileCheck, AlertCircle, User, Building, ChevronRight, UserCheck, FileSpreadsheet,
+  CircleCheck, CircleDashed, Mail, MessageSquare
+} from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  BarChart as RechartsBarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+} from "recharts";
 
-// Define common types for different analytics properties
-interface CommonAnalyticsData {
+// Type definitions for analytics data
+type ApplicationStatus = 'Pending' | 'Shortlisted' | 'Rejected' | 'Hired';
+
+type CommonAnalyticsData = {
+  attendancePercentage: number;
+  pendingLeaveRequests: number;
+};
+
+type AdminAnalyticsData = CommonAnalyticsData & {
   employeeCount: number;
   employeeChangeRate: number;
   newHires: number;
+  hrCount: number;
   currentAttendance: number;
-  attendancePercentage: number;
-  pendingLeaveRequests: number;
+  completedTasks: number;
   openPositions: number;
+  internalApplicants: number;
   revenueGrowth: number;
   costReduction: number;
-  monthlyRevenueData: Array<{ month: string; revenue: number }>;
+  monthlyRevenueData: Array<{ name: string; revenue: number }>;
   salaryDistribution: Array<{ name: string; value: number }>;
-  performanceStats: Array<{ name: string; value: number }>;
+  performanceStats: Array<{ name: string; performance: number }>;
+  applicationsToReview: number;
+  interviewsScheduled: number;
+  attendanceData: Array<{ name: string; value: number }>;
+  employeeDistribution: Array<{ name: string; value: number }>;
+  tasksInProgress: number;
+  tasksCompleted: number;
+};
+
+type HRAnalyticsData = CommonAnalyticsData & {
+  employeesManagedCount: number;
+  openJobPosts: number;
+  tasksAssigned: number;
+  applicationsToReview: number;
+  interviewsScheduled: number;
+  leaveRequestsApproved: number;
+  upcomingPayrolls: number;
+  teamAttendance: number;
+  resumes: number;
+  internalJobApplicants: number;
+  tasksInProgress: number;
+  tasksCompleted: number;
+  employeeDistribution: Array<{ name: string; value: number }>;
+  attendanceData: Array<{ name: string; value: number }>;
+};
+
+type EmployeeAnalyticsData = CommonAnalyticsData & {
   tasksCompleted: number;
   tasksInProgress: number;
   upcomingDeadlines: number;
   leaveDaysRemaining: number;
   leavesApproved: number;
   teamAttendance: number;
-  teamPerformance: number;
-  taskDistribution: Array<{ name: string; value: number }>;
-  recentActivities: Array<{ title: string; description: string; date: string }>;
-  applicationsToReview: number;
-  interviewsScheduled: number;
-  candidatesShortlisted: number;
-  attendanceData: Array<{ day: string; present: number; absent: number }>;
-  employeeDistribution: Array<{ name: string; value: number }>;
-  completedTasks: number;
-}
-
-// Define role-specific analytics data interfaces
-interface AdminAnalyticsData extends CommonAnalyticsData {}
-interface HRAnalyticsData extends CommonAnalyticsData {}
-interface EmployeeAnalyticsData extends CommonAnalyticsData {}
-
-type AnalyticsDataByRole = {
-  admin: AdminAnalyticsData;
-  hr: HRAnalyticsData;
-  employee: EmployeeAnalyticsData;
-}
-
-// Analytics data based on user role
-const analyticsData: AnalyticsDataByRole = {
-  admin: {
-    employeeCount: 87,
-    employeeChangeRate: 5.2,
-    newHires: 7,
-    currentAttendance: 81,
-    attendancePercentage: 93,
-    pendingLeaveRequests: 8,
-    completedTasks: 142,
-    openPositions: 12,
-    revenueGrowth: 18.4,
-    costReduction: 12.7,
-    performanceStats: [
-      { name: 'Excellent', value: 30 },
-      { name: 'Good', value: 45 },
-      { name: 'Average', value: 20 },
-      { name: 'Below Avg', value: 5 },
-    ],
-    monthlyRevenueData: [
-      { month: 'Jan', revenue: 45000 },
-      { month: 'Feb', revenue: 52000 },
-      { month: 'Mar', revenue: 49000 },
-      { month: 'Apr', revenue: 63000 },
-      { month: 'May', revenue: 58000 },
-      { month: 'Jun', revenue: 72000 },
-    ],
-    salaryDistribution: [
-      { name: 'Engineering', value: 45 },
-      { name: 'Marketing', value: 15 },
-      { name: 'HR', value: 10 },
-      { name: 'Finance', value: 15 },
-      { name: 'Operations', value: 15 },
-    ],
-    // Employee role properties
-    tasksCompleted: 142,
-    tasksInProgress: 10,
-    upcomingDeadlines: 5,
-    leaveDaysRemaining: 15,
-    leavesApproved: 5,
-    teamAttendance: 95,
-    teamPerformance: 92,
-    taskDistribution: [
-      { name: 'Completed', value: 142 },
-      { name: 'In Progress', value: 10 },
-      { name: 'Todo', value: 12 },
-      { name: 'Blocked', value: 3 },
-    ],
-    recentActivities: [
-      { title: 'System Update', description: 'Updated system to version 2.1', date: '1 hour ago' },
-      { title: 'New Employee', description: 'Onboarded 2 new developers', date: '3 hours ago' },
-      { title: 'Financial Report', description: 'Q2 report review completed', date: '1 day ago' },
-      { title: 'Security Audit', description: 'Completed annual security audit', date: '2 days ago' },
-    ],
-    // HR role properties
-    applicationsToReview: 24,
-    interviewsScheduled: 5,
-    candidatesShortlisted: 13,
-    attendanceData: [
-      { day: 'Mon', present: 85, absent: 2 },
-      { day: 'Tue', present: 82, absent: 5 },
-      { day: 'Wed', present: 83, absent: 4 },
-      { day: 'Thu', present: 87, absent: 0 },
-      { day: 'Fri', present: 80, absent: 7 },
-    ],
-    employeeDistribution: [
-      { name: 'Engineering', value: 42 },
-      { name: 'Marketing', value: 15 },
-      { name: 'HR', value: 9 },
-      { name: 'Finance', value: 12 },
-      { name: 'Operations', value: 9 },
-    ]
-  },
-  hr: {
-    employeeCount: 87,
-    employeeChangeRate: 5.2,
-    newHires: 7,
-    pendingLeaveRequests: 8,
-    currentAttendance: 81,
-    attendancePercentage: 93,
-    applicationsToReview: 24,
-    interviewsScheduled: 5,
-    candidatesShortlisted: 13,
-    attendanceData: [
-      { day: 'Mon', present: 85, absent: 2 },
-      { day: 'Tue', present: 82, absent: 5 },
-      { day: 'Wed', present: 83, absent: 4 },
-      { day: 'Thu', present: 87, absent: 0 },
-      { day: 'Fri', present: 80, absent: 7 },
-    ],
-    employeeDistribution: [
-      { name: 'Engineering', value: 42 },
-      { name: 'Marketing', value: 15 },
-      { name: 'HR', value: 9 },
-      { name: 'Finance', value: 12 },
-      { name: 'Operations', value: 9 },
-    ],
-    // Admin role properties
-    openPositions: 12,
-    revenueGrowth: 10.5,
-    costReduction: 8.3,
-    monthlyRevenueData: [
-      { month: 'Jan', revenue: 40000 },
-      { month: 'Feb', revenue: 45000 },
-      { month: 'Mar', revenue: 42000 },
-      { month: 'Apr', revenue: 50000 },
-      { month: 'May', revenue: 48000 },
-      { month: 'Jun', revenue: 55000 },
-    ],
-    salaryDistribution: [
-      { name: 'Engineering', value: 40 },
-      { name: 'Marketing', value: 18 },
-      { name: 'HR', value: 12 },
-      { name: 'Finance', value: 15 },
-      { name: 'Operations', value: 15 },
-    ],
-    performanceStats: [
-      { name: 'Excellent', value: 25 },
-      { name: 'Good', value: 42 },
-      { name: 'Average', value: 24 },
-      { name: 'Below Avg', value: 9 },
-    ],
-    // Employee properties
-    completedTasks: 142,
-    tasksCompleted: 30,
-    tasksInProgress: 5,
-    upcomingDeadlines: 3,
-    leaveDaysRemaining: 18,
-    leavesApproved: 12,
-    teamAttendance: 93,
-    teamPerformance: 90,
-    taskDistribution: [
-      { name: 'Completed', value: 30 },
-      { name: 'In Progress', value: 5 },
-      { name: 'Todo', value: 8 },
-      { name: 'Blocked', value: 2 },
-    ],
-    recentActivities: [
-      { title: 'Interview Scheduled', description: 'Senior Developer interview set for tomorrow', date: '2 hours ago' },
-      { title: 'Leave Approved', description: 'Approved leave request for John Smith', date: '4 hours ago' },
-      { title: 'New Application', description: 'Received 5 new job applications', date: '1 day ago' },
-      { title: 'Performance Review', description: 'Completed Q2 performance reviews', date: '3 days ago' },
-    ]
-  },
-  employee: {
-    tasksCompleted: 16,
-    tasksInProgress: 4,
-    upcomingDeadlines: 2,
-    attendancePercentage: 96,
-    leaveDaysRemaining: 12,
-    leavesApproved: 3,
-    teamAttendance: 92,
-    teamPerformance: 88,
-    taskDistribution: [
-      { name: 'Completed', value: 16 },
-      { name: 'In Progress', value: 4 },
-      { name: 'Todo', value: 3 },
-      { name: 'Blocked', value: 1 },
-    ],
-    recentActivities: [
-      { title: 'Task Completed', description: 'Updated user documentation', date: '2 hours ago' },
-      { title: 'Leave Approved', description: 'Your leave for June 15-16 was approved', date: '1 day ago' },
-      { title: 'New Task', description: 'Create wireframes for mobile app', date: '2 days ago' },
-      { title: 'Performance Review', description: 'Scheduled for next week', date: '3 days ago' },
-    ],
-    // Add all missing properties needed by other roles
-    employeeCount: 87,
-    employeeChangeRate: 0,
-    newHires: 0,
-    currentAttendance: 1,
-    pendingLeaveRequests: 0,
-    completedTasks: 16,
-    openPositions: 0,
-    revenueGrowth: 0,
-    costReduction: 0,
-    monthlyRevenueData: [
-      { month: 'Jan', revenue: 0 },
-      { month: 'Feb', revenue: 0 },
-      { month: 'Mar', revenue: 0 },
-      { month: 'Apr', revenue: 0 },
-      { month: 'May', revenue: 0 },
-      { month: 'Jun', revenue: 0 },
-    ],
-    salaryDistribution: [
-      { name: 'Engineering', value: 0 },
-      { name: 'Marketing', value: 0 },
-      { name: 'HR', value: 0 },
-      { name: 'Finance', value: 0 },
-      { name: 'Operations', value: 0 },
-    ],
-    performanceStats: [
-      { name: 'Excellent', value: 0 },
-      { name: 'Good', value: 0 },
-      { name: 'Average', value: 0 },
-      { name: 'Below Avg', value: 0 },
-    ],
-    applicationsToReview: 0,
-    interviewsScheduled: 0,
-    candidatesShortlisted: 0,
-    attendanceData: [
-      { day: 'Mon', present: 0, absent: 0 },
-      { day: 'Tue', present: 0, absent: 0 },
-      { day: 'Wed', present: 0, absent: 0 },
-      { day: 'Thu', present: 0, absent: 0 },
-      { day: 'Fri', present: 0, absent: 0 },
-    ],
-    employeeDistribution: [
-      { name: 'Engineering', value: 0 },
-      { name: 'Marketing', value: 0 },
-      { name: 'HR', value: 0 },
-      { name: 'Finance', value: 0 },
-      { name: 'Operations', value: 0 },
-    ]
-  }
+  internalJobsOpen: number;
+  tasksDue: number;
+  taskProgress: number;
+  attendanceStreak: number;
+  payrollStatus: string;
+  upcomingReview: string | null;
 };
 
-// Colors for charts
-const COLORS = ['#0F62FE', '#4589FF', '#78A9FF', '#A6C8FF', '#D0E2FF'];
+type AnalyticsData = AdminAnalyticsData | HRAnalyticsData | EmployeeAnalyticsData;
+
+// Mock data for different user roles
+const adminAnalyticsData: AdminAnalyticsData = {
+  employeeCount: 156,
+  employeeChangeRate: 4.2,
+  newHires: 8,
+  hrCount: 6,
+  currentAttendance: 132,
+  attendancePercentage: 87,
+  pendingLeaveRequests: 12,
+  completedTasks: 85,
+  openPositions: 7,
+  internalApplicants: 9,
+  revenueGrowth: 12.5,
+  costReduction: 8.7,
+  monthlyRevenueData: [
+    { name: 'Jan', revenue: 4000 },
+    { name: 'Feb', revenue: 4200 },
+    { name: 'Mar', revenue: 5100 },
+    { name: 'Apr', revenue: 4800 },
+    { name: 'May', revenue: 5400 },
+    { name: 'Jun', revenue: 6200 },
+  ],
+  salaryDistribution: [
+    { name: 'Executive', value: 28 },
+    { name: 'Management', value: 15 },
+    { name: 'Engineering', value: 35 },
+    { name: 'Marketing', value: 12 },
+    { name: 'Support', value: 10 },
+  ],
+  performanceStats: [
+    { name: 'Engineering', performance: 92 },
+    { name: 'Marketing', performance: 85 },
+    { name: 'Sales', performance: 78 },
+    { name: 'Support', performance: 88 },
+    { name: 'HR', performance: 90 },
+  ],
+  applicationsToReview: 23,
+  interviewsScheduled: 7,
+  attendanceData: [
+    { name: 'Present', value: 132 },
+    { name: 'Absent', value: 12 },
+    { name: 'Leave', value: 12 },
+  ],
+  employeeDistribution: [
+    { name: 'Engineering', value: 42 },
+    { name: 'Marketing', value: 28 },
+    { name: 'Sales', value: 30 },
+    { name: 'Support', value: 25 },
+    { name: 'HR', value: 15 },
+    { name: 'Finance', value: 16 },
+  ],
+  tasksInProgress: 46,
+  tasksCompleted: 85,
+};
+
+const hrAnalyticsData: HRAnalyticsData = {
+  employeesManagedCount: 34,
+  openJobPosts: 4,
+  tasksAssigned: 28,
+  pendingLeaveRequests: 7,
+  applicationsToReview: 16,
+  interviewsScheduled: 3,
+  leaveRequestsApproved: 5,
+  upcomingPayrolls: 1,
+  teamAttendance: 92,
+  resumes: 27,
+  internalJobApplicants: 4,
+  attendancePercentage: 92,
+  tasksInProgress: 18,
+  tasksCompleted: 32,
+  employeeDistribution: [
+    { name: 'Engineering', value: 12 },
+    { name: 'Marketing', value: 8 },
+    { name: 'Sales', value: 10 },
+    { name: 'Support', value: 4 },
+  ],
+  attendanceData: [
+    { name: 'Present', value: 31 },
+    { name: 'Absent', value: 2 },
+    { name: 'Leave', value: 1 },
+  ],
+};
+
+const employeeAnalyticsData: EmployeeAnalyticsData = {
+  tasksCompleted: 18,
+  tasksInProgress: 3,
+  upcomingDeadlines: 2,
+  attendancePercentage: 96,
+  leaveDaysRemaining: 12,
+  leavesApproved: 2,
+  teamAttendance: 90,
+  internalJobsOpen: 3,
+  pendingLeaveRequests: 1,
+  tasksDue: 2,
+  taskProgress: 82,
+  attendanceStreak: 14,
+  payrollStatus: "Processed on May 10",
+  upcomingReview: "June 15, 2025",
+};
+
+// BSON colors
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d'];
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const roleBasedData = user?.role ? analyticsData[user.role as keyof typeof analyticsData] : analyticsData.employee;
-  const [timeOfDay, setTimeOfDay] = useState<string>("");
-  
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("overview");
+  const [data, setData] = useState<AnalyticsData>(adminAnalyticsData);
+
   useEffect(() => {
-    // Set greeting based on time of day
-    const hour = new Date().getHours();
-    if (hour < 12) setTimeOfDay("morning");
-    else if (hour < 17) setTimeOfDay("afternoon");
-    else setTimeOfDay("evening");
-  }, []);
-  
-  // Conditional rendering based on user role
-  if (user?.role === 'admin') {
-    return (
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-start mb-6">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Good {timeOfDay}, {user?.name}</h1>
-            <p className="text-muted-foreground mt-1">
-              Here's what's happening across your organization today
-            </p>
-          </div>
-          <div className="mt-4 md:mt-0 flex gap-2">
-            <Button className="shadow-sm">
-              <FileText className="mr-2 h-4 w-4" />
-              Generate Reports
-            </Button>
-          </div>
-        </div>
+    // Set appropriate data based on user role
+    if (user) {
+      if (user.role === 'admin') {
+        setData(adminAnalyticsData);
+      } else if (user.role === 'hr') {
+        setData(hrAnalyticsData);
+      } else {
+        setData(employeeAnalyticsData);
+      }
+    }
+  }, [user]);
 
-        {/* Admin Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Users className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg font-medium">Employees</CardTitle>
-              </div>
-              <Badge className="font-normal">+{roleBasedData.employeeChangeRate}%</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{roleBasedData.employeeCount}</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                {roleBasedData.newHires} new this month
-              </p>
-              <div className="mt-3 flex items-center text-xs text-muted-foreground">
-                <ArrowUpRight className="h-3 w-3 mr-1" />
-                <span>Growing steadily</span>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Clock className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg font-medium">Attendance</CardTitle>
-              </div>
-              <Badge className="font-normal">{roleBasedData.attendancePercentage}%</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{roleBasedData.currentAttendance}</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Present today
-              </p>
-              <Progress 
-                value={roleBasedData.attendancePercentage} 
-                className="h-2 mt-3" 
-              />
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <BriefcaseBusiness className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg font-medium">Recruitment</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{roleBasedData.openPositions}</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Open positions
-              </p>
-              <div className="mt-3 flex items-center text-xs text-muted-foreground">
-                <ArrowUpRight className="h-3 w-3 mr-1" />
-                <span>24 applications to review</span>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <DollarSign className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg font-medium">Finance</CardTitle>
-              </div>
-              <Badge variant="outline" className="font-normal bg-green-500/10 text-green-500 border-green-300">
-                +{roleBasedData.revenueGrowth}%
-              </Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">$178.3K</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Monthly revenue
-              </p>
-              <div className="mt-3 flex items-center text-xs text-green-500">
-                <ArrowUpRight className="h-3 w-3 mr-1" />
-                <span>{roleBasedData.costReduction}% cost reduction</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+  const formatPercent = (value: number) => `${value}%`;
 
-        {/* Admin Analytics */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-          <Card className="col-span-1 lg:col-span-2 shadow-sm border-0">
-            <CardHeader>
-              <CardTitle>Revenue Overview</CardTitle>
-              <CardDescription>Monthly revenue for the current year</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={roleBasedData.monthlyRevenueData}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+  const StatCard = ({ 
+    title, 
+    value, 
+    description, 
+    icon, 
+    trend, 
+    onClick 
+  }: { 
+    title: string; 
+    value: string | number; 
+    description?: string; 
+    icon: React.ReactNode; 
+    trend?: { value: number; label: string } 
+    onClick?: () => void
+  }) => (
+    <Card 
+      className={`shadow-sm hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''}`}
+      onClick={onClick}
+    >
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
+          {title}
+        </CardTitle>
+        <div className="h-8 w-8 rounded-full bg-primary/10 p-1.5 text-primary">
+          {icon}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
+        {trend && (
+          <div className="flex items-center gap-1 mt-2 text-xs">
+            {trend.value > 0 ? (
+              <div className="text-green-500 flex items-center gap-0.5">
+                <TrendingUp className="h-3 w-3" />
+                <span>{trend.value}%</span>
+              </div>
+            ) : (
+              <div className="text-red-500 flex items-center gap-0.5">
+                <TrendingDown className="h-3 w-3" />
+                <span>{Math.abs(trend.value)}%</span>
+              </div>
+            )}
+            <span className="text-muted-foreground">{trend.label}</span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  // Shared components
+
+  // Admin dashboard components
+  const AdminDashboard = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Total Employees"
+          value={(data as AdminAnalyticsData).employeeCount}
+          description="Company-wide"
+          icon={<Users className="h-5 w-5" />}
+          trend={{ value: (data as AdminAnalyticsData).employeeChangeRate, label: "vs last month" }}
+          onClick={() => navigate("/employees")}
+        />
+        <StatCard
+          title="Total HRs"
+          value={(data as AdminAnalyticsData).hrCount}
+          description="Across departments"
+          icon={<UserCheck className="h-5 w-5" />}
+          onClick={() => navigate("/employees")}
+        />
+        <StatCard
+          title="Current Openings"
+          value={(data as AdminAnalyticsData).openPositions}
+          description="Active job postings"
+          icon={<Briefcase className="h-5 w-5" />}
+          onClick={() => navigate("/recruitment/jobs")}
+        />
+        <StatCard
+          title="Internal Applicants"
+          value={(data as AdminAnalyticsData).internalApplicants}
+          description="From current employees"
+          icon={<UserPlus className="h-5 w-5" />}
+          onClick={() => navigate("/recruitment/applications")}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Financial Overview</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">Revenue Growth</div>
+                <div className="flex items-center gap-2">
+                  <div className="text-2xl font-bold">{(data as AdminAnalyticsData).revenueGrowth}%</div>
+                  <TrendingUp className="h-5 w-5 text-green-500" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">Cost Reduction</div>
+                <div className="flex items-center gap-2">
+                  <div className="text-2xl font-bold">{(data as AdminAnalyticsData).costReduction}%</div>
+                  <TrendingDown className="h-5 w-5 text-green-500" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="h-60">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={(data as AdminAnalyticsData).monthlyRevenueData}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#0088FE" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#0088FE" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <Tooltip />
+                  <Area type="monotone" dataKey="revenue" stroke="#0088FE" fillOpacity={1} fill="url(#colorRevenue)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Salary Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-60">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart>
+                  <Pie
+                    data={(data as AdminAnalyticsData).salaryDistribution}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
                   >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`$${value}`, 'Revenue']} />
-                    <Line type="monotone" dataKey="revenue" stroke="#0F62FE" strokeWidth={2} dot={{ stroke: '#0F62FE', strokeWidth: 2, r: 4 }} />
-                  </LineChart>
-                </ResponsiveContainer>
+                    {(data as AdminAnalyticsData).salaryDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Attendance Overview</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="text-sm">Today's Attendance</div>
+              <div className="font-medium">{(data as AdminAnalyticsData).currentAttendance} / {(data as AdminAnalyticsData).employeeCount}</div>
+            </div>
+            <Progress value={(data as AdminAnalyticsData).attendancePercentage} className="h-2" />
+            <div className="text-xs text-muted-foreground text-right">
+              {(data as AdminAnalyticsData).attendancePercentage}% present
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/attendance")}>
+              View Details
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Department Performance</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {(data as AdminAnalyticsData).performanceStats.slice(0, 3).map((dept, index) => (
+              <div key={index} className="space-y-1">
+                <div className="flex items-center justify-between text-sm">
+                  <div>{dept.name}</div>
+                  <div className="font-medium">{dept.performance}%</div>
+                </div>
+                <Progress value={dept.performance} className="h-2" />
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader>
-              <CardTitle>Salary Distribution</CardTitle>
-              <CardDescription>Breakdown by department</CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center">
-              <div className="h-[300px] w-full flex flex-col items-center justify-center">
+            ))}
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" size="sm" className="w-full">
+              View All Departments
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span>Leave Requests</span>
+              </div>
+              <Badge>{data.pendingLeaveRequests}</Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm">
+                <FileCheck className="h-4 w-4 text-muted-foreground" />
+                <span>Applications to Review</span>
+              </div>
+              <Badge>{(data as AdminAnalyticsData).applicationsToReview}</Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span>Interviews Scheduled</span>
+              </div>
+              <Badge>{(data as AdminAnalyticsData).interviewsScheduled}</Badge>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" size="sm" className="w-full">
+              Review All
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Attendance Trend</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-60">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsBarChart
+                  data={(data as AdminAnalyticsData).attendanceData}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="value" fill="#0088FE" />
+                </RechartsBarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Department Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-60">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart>
+                  <Pie
+                    data={(data as AdminAnalyticsData).employeeDistribution}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {(data as AdminAnalyticsData).employeeDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Recent Activities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                  <UserPlus className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium">New employee onboarded</div>
+                  <div className="text-sm text-muted-foreground">Sarah Johnson joined as Senior Developer</div>
+                </div>
+                <div className="text-sm text-muted-foreground">2h ago</div>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium">Leave request approved</div>
+                  <div className="text-sm text-muted-foreground">Mike's vacation request for next week</div>
+                </div>
+                <div className="text-sm text-muted-foreground">4h ago</div>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                  <Briefcase className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium">New job posted</div>
+                  <div className="text-sm text-muted-foreground">Marketing Manager position opened by HR</div>
+                </div>
+                <div className="text-sm text-muted-foreground">6h ago</div>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                  <FileCheck className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium">Applications reviewed</div>
+                  <div className="text-sm text-muted-foreground">{(data as AdminAnalyticsData).applicationsToReview} new applications for Developer role</div>
+                </div>
+                <div className="text-sm text-muted-foreground">Yesterday</div>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" size="sm" className="w-full">
+              View All Activities
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
+  );
+
+  // HR dashboard components
+  const HRDashboard = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Employees Managed"
+          value={(data as HRAnalyticsData).employeesManagedCount}
+          description="Under your department"
+          icon={<Users className="h-5 w-5" />}
+          onClick={() => navigate("/employees")}
+        />
+        <StatCard
+          title="Job Posts Open"
+          value={(data as HRAnalyticsData).openJobPosts}
+          description="Active positions"
+          icon={<Briefcase className="h-5 w-5" />}
+          onClick={() => navigate("/recruitment/jobs")}
+        />
+        <StatCard
+          title="Tasks Assigned"
+          value={(data as HRAnalyticsData).tasksAssigned}
+          description="Across all employees"
+          icon={<CheckCircle2 className="h-5 w-5" />}
+          onClick={() => navigate("/tasks")}
+        />
+        <StatCard
+          title="Pending Leave Requests"
+          value={data.pendingLeaveRequests}
+          description="Awaiting your approval"
+          icon={<Calendar className="h-5 w-5" />}
+          onClick={() => navigate("/leave/requests")}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Recruitment Overview</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">Resumes Received</div>
+                <div className="text-2xl font-bold">{(data as HRAnalyticsData).resumes}</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">Applications Pending</div>
+                <div className="text-2xl font-bold">{(data as HRAnalyticsData).applicationsToReview}</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">Interviews Scheduled</div>
+                <div className="text-2xl font-bold">{(data as HRAnalyticsData).interviewsScheduled}</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">Internal Applications</div>
+                <div className="text-2xl font-bold">{(data as HRAnalyticsData).internalJobApplicants}</div>
+              </div>
+            </div>
+            
+            <div className="border-t pt-4">
+              <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/recruitment/applications")}>
+                Review Applications
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Team Attendance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm">Today's Attendance Rate</div>
+                  <div className="font-medium">{(data as HRAnalyticsData).teamAttendance}%</div>
+                </div>
+                <Progress value={(data as HRAnalyticsData).teamAttendance} className="h-2" />
+              </div>
+              
+              <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={roleBasedData.salaryDistribution}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {roleBasedData.salaryDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => [`${value}%`, 'Percentage']} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Pending Approvals & Performance */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <Card className="shadow-sm border-0">
-            <CardHeader>
-              <div className="flex justify-between">
-                <CardTitle>Pending Approvals</CardTitle>
-                <Badge>{roleBasedData.pendingLeaveRequests}</Badge>
-              </div>
-              <CardDescription>Requests that need your attention</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="bg-muted/40 rounded-lg p-4 flex items-start justify-between">
-                  <div className="flex gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src="https://github.com/shadcn.png" />
-                      <AvatarFallback>JD</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">John Doe</p>
-                      <p className="text-sm text-muted-foreground">Leave request: June 15-20 (Medical)</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="h-8">
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Deny
-                    </Button>
-                    <Button size="sm" className="h-8">
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
-                      Approve
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="bg-muted/40 rounded-lg p-4 flex items-start justify-between">
-                  <div className="flex gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src="https://github.com/shadcn.png" />
-                      <AvatarFallback>AS</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">Anna Smith</p>
-                      <p className="text-sm text-muted-foreground">Leave request: June 12 (Personal)</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="h-8">
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Deny
-                    </Button>
-                    <Button size="sm" className="h-8">
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
-                      Approve
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="bg-muted/40 rounded-lg p-4 flex items-start justify-between">
-                  <div className="flex gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src="https://github.com/shadcn.png" />
-                      <AvatarFallback>RJ</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">Robert Johnson</p>
-                      <p className="text-sm text-muted-foreground">Equipment request: New laptop ($1,200)</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="h-8">
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Deny
-                    </Button>
-                    <Button size="sm" className="h-8">
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
-                      Approve
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-sm border-0">
-            <CardHeader>
-              <CardTitle>Team Performance</CardTitle>
-              <CardDescription>Overall performance ratings</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={roleBasedData.performanceStats}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  <RechartsBarChart
+                    data={(data as HRAnalyticsData).attendanceData}
+                    margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
-                    <Tooltip formatter={(value) => [`${value} employees`, 'Count']} />
-                    <Bar dataKey="value" fill="#0F62FE" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  } else if (user?.role === 'hr') {
-    return (
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-start mb-6">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Good {timeOfDay}, {user?.name}</h1>
-            <p className="text-muted-foreground mt-1">
-              Here's what's happening in human resources today
-            </p>
-          </div>
-          <div className="mt-4 md:mt-0 flex gap-2">
-            <Button className="shadow-sm">
-              <FileText className="mr-2 h-4 w-4" />
-              HR Reports
-            </Button>
-          </div>
-        </div>
-
-        {/* HR Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Users className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg font-medium">Employees</CardTitle>
-              </div>
-              <Badge className="font-normal">+{roleBasedData.employeeChangeRate}%</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{roleBasedData.employeeCount}</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                {roleBasedData.newHires} new this month
-              </p>
-              <div className="mt-3 flex items-center text-xs text-muted-foreground">
-                <ArrowUpRight className="h-3 w-3 mr-1" />
-                <span>Growing steadily</span>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Clock className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg font-medium">Attendance</CardTitle>
-              </div>
-              <Badge className="font-normal">{roleBasedData.attendancePercentage}%</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{roleBasedData.currentAttendance}</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Present today
-              </p>
-              <Progress 
-                value={roleBasedData.attendancePercentage} 
-                className="h-2 mt-3" 
-              />
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Calendar className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg font-medium">Leave Requests</CardTitle>
-              </div>
-              <Badge>{roleBasedData.pendingLeaveRequests}</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{roleBasedData.pendingLeaveRequests}</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Pending approvals
-              </p>
-              <div className="mt-3 flex items-center text-xs text-muted-foreground">
-                <AlertCircle className="h-3 w-3 mr-1" />
-                <span>Needs attention</span>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <BriefcaseBusiness className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg font-medium">Recruitment</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{roleBasedData.applicationsToReview}</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Applications to review
-              </p>
-              <div className="mt-3 flex items-center text-xs text-muted-foreground">
-                <ArrowUpRight className="h-3 w-3 mr-1" />
-                <span>{roleBasedData.interviewsScheduled} interviews scheduled</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* HR Analytics */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-          <Card className="col-span-1 lg:col-span-2 shadow-sm border-0">
-            <CardHeader>
-              <CardTitle>Weekly Attendance</CardTitle>
-              <CardDescription>Daily attendance for the current week</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={roleBasedData.attendanceData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="day" />
-                    <YAxis />
                     <Tooltip />
-                    <Bar name="Present" dataKey="present" stackId="a" fill="#0F62FE" />
-                    <Bar name="Absent" dataKey="absent" stackId="a" fill="#FA4D56" />
-                  </BarChart>
+                    <Bar dataKey="value" fill="#0088FE" />
+                  </RechartsBarChart>
                 </ResponsiveContainer>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader>
-              <CardTitle>Employee Distribution</CardTitle>
-              <CardDescription>By department</CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center">
-              <div className="h-[300px] w-full flex flex-col items-center justify-center">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={roleBasedData.employeeDistribution}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}`}
-                    >
-                      {roleBasedData.employeeDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => [`${value} employees`, 'Count']} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Recruitment Stats & Leave Approvals */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <Card className="shadow-sm border-0">
-            <CardHeader>
-              <div className="flex justify-between">
-                <CardTitle>Recruitment Pipeline</CardTitle>
-                <Badge variant="outline">{roleBasedData.applicationsToReview} new</Badge>
-              </div>
-              <CardDescription>Current recruitment activities</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="bg-muted/40 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-500/10 rounded-lg">
-                        <Building className="h-5 w-5 text-blue-500" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Senior Developer</p>
-                        <p className="text-sm text-muted-foreground">Engineering • Full-time</p>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-200">
-                      8 applicants
-                    </Badge>
-                  </div>
-                  <div className="mt-3">
-                    <p className="text-sm text-muted-foreground">4 candidates shortlisted, 2 interviews scheduled</p>
-                  </div>
-                </div>
-                
-                <div className="bg-muted/40 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-amber-500/10 rounded-lg">
-                        <Building className="h-5 w-5 text-amber-500" />
-                      </div>
-                      <div>
-                        <p className="font-medium">UI/UX Designer</p>
-                        <p className="text-sm text-muted-foreground">Design • Full-time</p>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-200">
-                      12 applicants
-                    </Badge>
-                  </div>
-                  <div className="mt-3">
-                    <p className="text-sm text-muted-foreground">6 candidates shortlisted, 3 interviews scheduled</p>
-                  </div>
-                </div>
-                
-                <div className="bg-muted/40 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-green-500/10 rounded-lg">
-                        <Building className="h-5 w-5 text-green-500" />
-                      </div>
-                      <div>
-                        <p className="font-medium">HR Coordinator</p>
-                        <p className="text-sm text-muted-foreground">Human Resources • Part-time</p>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-200">
-                      4 applicants
-                    </Badge>
-                  </div>
-                  <div className="mt-3">
-                    <p className="text-sm text-muted-foreground">3 candidates shortlisted, 1 interview scheduled</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader>
-              <div className="flex justify-between">
-                <CardTitle>Leave Requests</CardTitle>
-                <Badge>{roleBasedData.pendingLeaveRequests}</Badge>
-              </div>
-              <CardDescription>Pending leave approvals</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="bg-muted/40 rounded-lg p-4 flex items-start justify-between">
-                  <div className="flex gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src="https://github.com/shadcn.png" />
-                      <AvatarFallback>JD</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">John Doe</p>
-                      <p className="text-sm text-muted-foreground">June 15-20 (5 days) • Medical</p>
-                      <div className="flex items-center mt-1">
-                        <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Engineering</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="h-8">
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Deny
-                    </Button>
-                    <Button size="sm" className="h-8">
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
-                      Approve
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="bg-muted/40 rounded-lg p-4 flex items-start justify-between">
-                  <div className="flex gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src="https://github.com/shadcn.png" />
-                      <AvatarFallback>AS</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">Anna Smith</p>
-                      <p className="text-sm text-muted-foreground">June 12 (1 day) • Personal</p>
-                      <div className="flex items-center mt-1">
-                        <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Marketing</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="h-8">
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Deny
-                    </Button>
-                    <Button size="sm" className="h-8">
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
-                      Approve
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="bg-muted/40 rounded-lg p-4 flex items-start justify-between">
-                  <div className="flex gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src="https://github.com/shadcn.png" />
-                      <AvatarFallback>RJ</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">Robert Johnson</p>
-                      <p className="text-sm text-muted-foreground">June 22-23 (2 days) • Vacation</p>
-                      <div className="flex items-center mt-1">
-                        <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Finance</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="h-8">
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Deny
-                    </Button>
-                    <Button size="sm" className="h-8">
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
-                      Approve
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/attendance")}>
+              View Details
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
-    );
-  } else {
-    // Default Employee Dashboard
-    return (
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-start mb-6">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Good {timeOfDay}, {user?.name}</h1>
-            <p className="text-muted-foreground mt-1">
-              Here's your work summary for today
-            </p>
-          </div>
-        </div>
-        
-        {/* Employee Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <FileText className="h-5 w-5 text-primary" />
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Task Progress</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-1">
+                  <CircleDashed className="h-4 w-4 text-orange-500" />
+                  <span>In Progress</span>
                 </div>
-                <CardTitle className="text-lg font-medium">Tasks</CardTitle>
+                <div className="font-medium">{(data as HRAnalyticsData).tasksInProgress}</div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{roleBasedData.tasksInProgress}</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                In progress
-              </p>
-              <div className="mt-3 flex items-center text-xs text-muted-foreground">
-                <CheckCircle2 className="h-3 w-3 mr-1 text-green-500" />
-                <span>{roleBasedData.tasksCompleted} completed this week</span>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-1">
+                  <CircleCheck className="h-4 w-4 text-green-500" />
+                  <span>Completed</span>
+                </div>
+                <div className="font-medium">{(data as HRAnalyticsData).tasksCompleted}</div>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Calendar className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg font-medium">Time Off</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{roleBasedData.leaveDaysRemaining}</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Days available
-              </p>
-              <div className="mt-3 flex items-center text-xs text-muted-foreground">
-                <CheckCircle2 className="h-3 w-3 mr-1 text-green-500" />
-                <span>{roleBasedData.leavesApproved} days approved</span>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Clock className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg font-medium">Deadlines</CardTitle>
-              </div>
-              {roleBasedData.upcomingDeadlines > 0 && (
-                <Badge variant="outline" className="font-normal bg-amber-500/10 text-amber-500 border-amber-200">
-                  {roleBasedData.upcomingDeadlines}
-                </Badge>
-              )}
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{roleBasedData.upcomingDeadlines}</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Due this week
-              </p>
-              <div className="mt-3 flex items-center text-xs text-muted-foreground">
-                <AlertCircle className="h-3 w-3 mr-1 text-amber-500" />
-                <span>Highest priority: UI design</span>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-sm border-0">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Users className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg font-medium">Team</CardTitle>
-              </div>
-              <Badge className="font-normal">{roleBasedData.teamAttendance}%</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{roleBasedData.teamPerformance}%</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Performance
-              </p>
-              <Progress 
-                value={roleBasedData.teamPerformance} 
-                className="h-2 mt-3" 
-              />
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Employee Tasks & Activities */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-          <Card className="shadow-sm border-0 col-span-1 lg:col-span-2">
-            <CardHeader>
-              <CardTitle>My Tasks</CardTitle>
-              <CardDescription>Your assigned and upcoming tasks</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="bg-muted/40 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Update user documentation</p>
-                      <div className="flex items-center mt-1">
-                        <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Due in 2 days</span>
-                      </div>
-                    </div>
-                    <Badge className="bg-green-500/10 text-green-500 border-green-200">
-                      In progress
-                    </Badge>
-                  </div>
-                  <div className="mt-3">
-                    <Progress value={75} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-1">75% completed</p>
-                  </div>
-                </div>
-                
-                <div className="bg-muted/40 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Create wireframes for mobile app</p>
-                      <div className="flex items-center mt-1">
-                        <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Due tomorrow</span>
-                      </div>
-                    </div>
-                    <Badge className="bg-amber-500/10 text-amber-500 border-amber-200">
-                      In progress
-                    </Badge>
-                  </div>
-                  <div className="mt-3">
-                    <Progress value={30} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-1">30% completed</p>
-                  </div>
-                </div>
-                
-                <div className="bg-muted/40 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Review code for project X</p>
-                      <div className="flex items-center mt-1">
-                        <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Due in 3 days</span>
-                      </div>
-                    </div>
-                    <Badge className="bg-slate-500/10 text-slate-500 border-slate-200">
-                      Not started
-                    </Badge>
-                  </div>
-                  <div className="mt-3">
-                    <Progress value={0} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-1">Not started yet</p>
-                  </div>
-                </div>
-                
-                <div className="bg-muted/40 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Update company profile page</p>
-                      <div className="flex items-center mt-1">
-                        <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Due in 5 days</span>
-                      </div>
-                    </div>
-                    <Badge className="bg-blue-500/10 text-blue-500 border-blue-200">
-                      Planning
-                    </Badge>
-                  </div>
-                  <div className="mt-3">
-                    <Progress value={10} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-1">10% completed</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <div className="space-y-6">
-            <Card className="shadow-sm border-0">
-              <CardHeader>
-                <CardTitle>Task Distribution</CardTitle>
-                <CardDescription>Your current workload</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[180px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={roleBasedData.taskDistribution}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={70}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={({ name, value }) => `${name}: ${value}`}
-                      >
-                        {roleBasedData.taskDistribution.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value) => [`${value} tasks`, 'Count']} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="shadow-sm border-0">
-              <CardHeader>
-                <CardTitle>Recent Activities</CardTitle>
-                <CardDescription>Your latest updates</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {roleBasedData.recentActivities.map((activity, index) => (
-                    <div className="flex items-start space-x-3" key={index}>
-                      <div className="h-2 w-2 rounded-full bg-primary mt-2"></div>
-                      <div>
-                        <p className="font-medium text-sm">{activity.title}</p>
-                        <p className="text-xs text-muted-foreground">{activity.description}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{activity.date}</p>
-                      </div>
-                    </div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/tasks")}>
+              Manage Tasks
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Leave Management</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm">Pending Requests</div>
+              <div className="font-medium">{data.pendingLeaveRequests}</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="text-sm">Approved This Week</div>
+              <div className="font-medium">{(data as HRAnalyticsData).leaveRequestsApproved}</div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/leave/requests")}>
+              Review Requests
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Payroll Status</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm">Next Payroll Run</div>
+              <div className="font-medium">May 25, 2025</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="text-sm">Payrolls Pending</div>
+              <div className="font-medium">{(data as HRAnalyticsData).upcomingPayrolls}</div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/payroll")}>
+              Process Payroll
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+
+      <Card className="shadow-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Department Distribution</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsPieChart>
+                <Pie
+                  data={(data as HRAnalyticsData).employeeDistribution}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {(data as HRAnalyticsData).employeeDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
-                </div>
-              </CardContent>
-            </Card>
+                </Pie>
+                <Tooltip />
+              </RechartsPieChart>
+            </ResponsiveContainer>
           </div>
-        </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  // Employee dashboard components
+  const EmployeeDashboard = () => (
+    <div className="space-y-6">
+      <Card className="shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-0">
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+            <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <User className="h-10 w-10" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold">{user?.name || "Employee"}</h2>
+              <p className="text-muted-foreground">{user?.position || "Position"} • {user?.department || "Department"}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Badge variant="outline" className="bg-primary/10">Employee ID: EMP-{user?.id || "001"}</Badge>
+                <Badge variant="outline" className="bg-primary/10">Joined: {new Date().toLocaleDateString()}</Badge>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Tasks Assigned"
+          value={(data as EmployeeAnalyticsData).tasksInProgress + (data as EmployeeAnalyticsData).tasksCompleted}
+          description={`${(data as EmployeeAnalyticsData).tasksDue} due soon`}
+          icon={<CheckCircle2 className="h-5 w-5" />}
+          onClick={() => navigate("/tasks")}
+        />
+        <StatCard
+          title="Leave Balance"
+          value={(data as EmployeeAnalyticsData).leaveDaysRemaining}
+          description="Days remaining"
+          icon={<Calendar className="h-5 w-5" />}
+          onClick={() => navigate("/leave/history")}
+        />
+        <StatCard
+          title="Attendance Streak"
+          value={(data as EmployeeAnalyticsData).attendanceStreak}
+          description="Days in a row"
+          icon={<Clock className="h-5 w-5" />}
+          onClick={() => navigate("/attendance")}
+        />
+        <StatCard
+          title="Internal Jobs"
+          value={(data as EmployeeAnalyticsData).internalJobsOpen}
+          description="Open positions"
+          icon={<Briefcase className="h-5 w-5" />}
+          onClick={() => navigate("/recruitment/internal")}
+        />
       </div>
-    );
-  }
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">My Tasks</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-sm font-medium">Task Progress</div>
+                <div className="text-sm font-medium">{(data as EmployeeAnalyticsData).taskProgress}%</div>
+              </div>
+              <Progress value={(data as EmployeeAnalyticsData).taskProgress} className="h-2" />
+            </div>
+            
+            <div className="space-y-3 mt-4">
+              <div className="flex items-center gap-3 p-3 rounded-md border">
+                <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-500">
+                  <Clock className="h-4 w-4" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium">Update client presentation</div>
+                  <div className="text-sm text-muted-foreground">Due in 2 days</div>
+                </div>
+                <Badge variant="outline" className="bg-orange-50 text-orange-500 hover:bg-orange-50">In Progress</Badge>
+              </div>
+              
+              <div className="flex items-center gap-3 p-3 rounded-md border">
+                <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500">
+                  <Clock className="h-4 w-4" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium">Submit quarterly report</div>
+                  <div className="text-sm text-muted-foreground">Due tomorrow</div>
+                </div>
+                <Badge variant="outline" className="bg-blue-50 text-blue-500 hover:bg-blue-50">To Do</Badge>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/tasks")}>
+              View All Tasks
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/leave/apply")}>
+              <Calendar className="mr-2 h-5 w-5" />
+              Apply for Leave
+            </Button>
+            
+            <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/attendance")}>
+              <Clock className="mr-2 h-5 w-5" />
+              Mark Attendance
+            </Button>
+            
+            <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/recruitment/internal")}>
+              <Briefcase className="mr-2 h-5 w-5" />
+              Browse Internal Jobs
+            </Button>
+            
+            <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/profile")}>
+              <User className="mr-2 h-5 w-5" />
+              Update Profile
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Leave Status</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm">Approved Leaves</div>
+              <div className="font-medium">{(data as EmployeeAnalyticsData).leavesApproved}</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="text-sm">Pending Requests</div>
+              <div className="font-medium">{data.pendingLeaveRequests}</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="text-sm">Available Balance</div>
+              <div className="font-medium">{(data as EmployeeAnalyticsData).leaveDaysRemaining} days</div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/leave/history")}>
+              View History
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Important Dates</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {(data as EmployeeAnalyticsData).upcomingReview && (
+              <div className="flex items-center justify-between">
+                <div className="text-sm">Performance Review</div>
+                <div className="font-medium">{(data as EmployeeAnalyticsData).upcomingReview}</div>
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <div className="text-sm">Next Payroll</div>
+              <div className="font-medium">May 25, 2025</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="text-sm">Team Meeting</div>
+              <div className="font-medium">Friday, 10:00 AM</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Quick Stats</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm">Payroll Status</div>
+              <div className="font-medium">{(data as EmployeeAnalyticsData).payrollStatus}</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="text-sm">Team Attendance</div>
+              <div className="font-medium">{(data as EmployeeAnalyticsData).teamAttendance}%</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="text-sm">Tasks Completed</div>
+              <div className="font-medium">{(data as EmployeeAnalyticsData).tasksCompleted}</div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="shadow-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Recent Notifications</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                <MessageSquare className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <div className="font-medium">New announcement from HR</div>
+                <div className="text-sm text-muted-foreground">Office will be closed on May 25th for maintenance</div>
+              </div>
+              <div className="text-sm text-muted-foreground">2h ago</div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <div className="font-medium">Task assigned to you</div>
+                <div className="text-sm text-muted-foreground">Review Q1 marketing metrics by Friday</div>
+              </div>
+              <div className="text-sm text-muted-foreground">Yesterday</div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                <Mail className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <div className="font-medium">Leave request approved</div>
+                <div className="text-sm text-muted-foreground">Your vacation request for June 15-20 has been approved</div>
+              </div>
+              <div className="text-sm text-muted-foreground">2 days ago</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  return (
+    <div className="container mx-auto py-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="mb-2">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          <TabsTrigger value="attendance">Attendance</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="overview" className="space-y-6">
+          {user?.role === 'admin' && <AdminDashboard />}
+          {user?.role === 'hr' && <HRDashboard />}
+          {user?.role === 'employee' && <EmployeeDashboard />}
+        </TabsContent>
+        
+        <TabsContent value="tasks" className="space-y-6">
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle>Task Overview</CardTitle>
+              <CardDescription>
+                Track the status of your tasks
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                        <Clock className="h-4 w-4" />
+                      </div>
+                      <div className="font-medium">In Progress</div>
+                    </div>
+                    <div className="text-3xl font-bold">
+                      {user?.role === 'employee' ? (data as EmployeeAnalyticsData).tasksInProgress : 
+                      (user?.role === 'hr' ? (data as HRAnalyticsData).tasksInProgress : (data as AdminAnalyticsData).tasksInProgress)}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                        <CheckCircle2 className="h-4 w-4" />
+                      </div>
+                      <div className="font-medium">Completed</div>
+                    </div>
+                    <div className="text-3xl font-bold">
+                      {user?.role === 'employee' ? (data as EmployeeAnalyticsData).tasksCompleted : 
+                      (user?.role === 'hr' ? (data as HRAnalyticsData).tasksCompleted : (data as AdminAnalyticsData).tasksCompleted)}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                        <AlertCircle className="h-4 w-4" />
+                      </div>
+                      <div className="font-medium">Upcoming Deadlines</div>
+                    </div>
+                    <div className="text-3xl font-bold">
+                      {user?.role === 'employee' ? (data as EmployeeAnalyticsData).upcomingDeadlines : 2}
+                    </div>
+                  </div>
+                </div>
+                
+                <Button variant="outline" className="w-full" onClick={() => navigate("/tasks")}>
+                  View All Tasks
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="attendance" className="space-y-6">
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle>Attendance Overview</CardTitle>
+              <CardDescription>
+                Track attendance records
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-8">
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">Today's Attendance</div>
+                  <Progress value={data.attendancePercentage} className="h-2" />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>0%</span>
+                    <span>{data.attendancePercentage}%</span>
+                    <span>100%</span>
+                  </div>
+                </div>
+                
+                <Button variant="outline" className="w-full" onClick={() => navigate("/attendance")}>
+                  View Attendance Details
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
 };
 
 export default Dashboard;
