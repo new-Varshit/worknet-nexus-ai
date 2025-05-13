@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 export type UserRole = 'admin' | 'hr' | 'employee';
 
-interface User {
+export interface User {
   id: string;
   name: string;
   email: string;
@@ -32,7 +32,7 @@ const MOCK_USERS = [
     email: 'admin@worknet360.com',
     password: 'admin123',
     role: 'admin' as UserRole,
-    avatar: '',
+    avatar: 'https://ui-avatars.com/api/?name=Admin+User&background=0F62FE&color=fff',
     department: 'Executive',
     position: 'Chief Administrator',
   },
@@ -42,7 +42,7 @@ const MOCK_USERS = [
     email: 'hr@worknet360.com',
     password: 'hr123',
     role: 'hr' as UserRole,
-    avatar: '',
+    avatar: 'https://ui-avatars.com/api/?name=HR+Manager&background=0F62FE&color=fff',
     department: 'Human Resources',
     position: 'HR Director',
   },
@@ -52,7 +52,7 @@ const MOCK_USERS = [
     email: 'employee@worknet360.com',
     password: 'employee123',
     role: 'employee' as UserRole,
-    avatar: '',
+    avatar: 'https://ui-avatars.com/api/?name=John+Employee&background=0F62FE&color=fff',
     department: 'Engineering',
     position: 'Software Developer',
   },
