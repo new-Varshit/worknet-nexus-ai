@@ -64,7 +64,27 @@ const JobPostingSchema = new mongoose.Schema({
     type: Date
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { 
+    virtuals: true,
+    transform: function(doc, ret) {
+      // Ensure applications is always an array, even if it's null/undefined
+      if (!ret.applications) {
+        ret.applications = [];
+      }
+      return ret;
+    }
+  },
+  toObject: { 
+    virtuals: true,
+    transform: function(doc, ret) {
+      // Ensure applications is always an array, even if it's null/undefined
+      if (!ret.applications) {
+        ret.applications = [];
+      }
+      return ret;
+    }
+  }
 });
 
 module.exports = mongoose.model('JobPosting', JobPostingSchema);
