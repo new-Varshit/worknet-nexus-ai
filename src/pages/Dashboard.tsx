@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, ChevronRight } from "lucide-react";
+import { ChevronRight, Users, Clock, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, startOfMonth } from "date-fns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -144,6 +144,7 @@ const Dashboard = () => {
           description="Total employees"
           changeValue="+2 this month"
           changeType="increase"
+          icon={<Users className="h-4 w-4" />}
         />
         <StatCard
           title="Attendance"
@@ -151,6 +152,7 @@ const Dashboard = () => {
           description="Average attendance"
           changeValue="+2% from last month"
           changeType="increase"
+          icon={<Clock className="h-4 w-4" />}
         />
         <StatCard
           title="Open Positions"
@@ -158,6 +160,7 @@ const Dashboard = () => {
           description="Job openings"
           changeValue="+3 this week"
           changeType="increase"
+          icon={<Briefcase className="h-4 w-4" />}
         />
       </div>
 
