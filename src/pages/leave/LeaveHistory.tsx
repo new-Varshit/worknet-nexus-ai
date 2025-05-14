@@ -335,7 +335,7 @@ const LeaveHistory = () => {
                         variant="outline"
                         onClick={() => handleViewRequest(request)}
                       >
-                        View
+                        Details
                       </Button>
                     </TableCell>
                   </TableRow>

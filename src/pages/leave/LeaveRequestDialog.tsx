@@ -1,38 +1,22 @@
 
-import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
-import { toast } from "sonner";
 
 interface LeaveRequestDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   request: any;
-  onApprove?: (id: number) => void;
-  onReject?: (id: number) => void;
 }
 
 const LeaveRequestDialog = ({
   open,
   onOpenChange,
   request,
-  onApprove,
-  onReject,
 }: LeaveRequestDialogProps) => {
-  const [comments, setComments] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
   if (!request) return null;
   
   // Helper function to get initials from name
@@ -56,39 +40,6 @@ const LeaveRequestDialog = ({
       default:
         return null;
     }
-  };
-  
-  const handleApprove = () => {
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      if (onApprove) {
-        onApprove(request.id);
-      }
-      
-      setIsSubmitting(false);
-      onOpenChange(false);
-    }, 1000);
-  };
-  
-  const handleReject = () => {
-    if (!comments.trim()) {
-      toast.error("Please provide a reason for rejection");
-      return;
-    }
-    
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      if (onReject) {
-        onReject(request.id);
-      }
-      
-      setIsSubmitting(false);
-      onOpenChange(false);
-    }, 1000);
   };
   
   return (
@@ -167,59 +118,12 @@ const LeaveRequestDialog = ({
               <p>{request.rejectionReason}</p>
             </div>
           )}
-          
-          {request.status === "Pending" && (
-            <div className="space-y-4">
-              <Separator />
-              
-              <div className="space-y-2">
-                <label htmlFor="comments" className="text-sm font-medium">
-                  Comments <span className="text-muted-foreground">(Required for rejection)</span>
-                </label>
-                <Textarea
-                  id="comments"
-                  value={comments}
-                  onChange={(e) => setComments(e.target.value)}
-                  placeholder="Add comments or reasons for approval/rejection"
-                  rows={3}
-                />
-              </div>
-            </div>
-          )}
         </div>
         
-        <DialogFooter className="flex justify-between sm:justify-end gap-2">
-          {request.status === "Pending" ? (
-            <>
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              
-              <Button
-                variant="destructive"
-                onClick={handleReject}
-                disabled={isSubmitting}
-              >
-                Reject
-              </Button>
-              
-              <Button
-                className="bg-green-600 hover:bg-green-700"
-                onClick={handleApprove}
-                disabled={isSubmitting}
-              >
-                Approve
-              </Button>
-            </>
-          ) : (
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Close
-            </Button>
-          )}
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
