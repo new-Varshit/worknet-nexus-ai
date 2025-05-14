@@ -1,4 +1,3 @@
-
 import { useState, useEffect, ChangeEvent } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -15,11 +14,11 @@ import { toast } from "sonner";
 import { User } from "@/contexts/AuthContext";
 import { CalendarIcon, Upload } from "lucide-react";
 
-interface ExtendedUser extends User {
+interface ExtendedUser extends Omit<User, 'dateOfBirth'> {
   address?: string;
   phoneNumber?: string;
   gender?: string;
-  dateOfBirth?: Date | string;
+  dateOfBirth?: string; // Changed from Date | string to match User interface
   workLocation?: 'Onsite' | 'Remote' | 'Hybrid';
   documents?: Array<{name: string, url: string, uploadDate: string}>;
 }
@@ -68,7 +67,8 @@ const Profile = () => {
   const handleDateChange = (selectedDate: Date | undefined) => {
     setDate(selectedDate);
     if (selectedDate) {
-      setProfileData(prev => prev ? { ...prev, dateOfBirth: selectedDate } : null);
+      // Convert Date to string when saving to profileData to match the expected type
+      setProfileData(prev => prev ? { ...prev, dateOfBirth: selectedDate.toISOString() } : null);
     }
   };
 
