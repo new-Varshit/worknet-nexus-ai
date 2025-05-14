@@ -49,10 +49,13 @@ const JobPostingSchema = new mongoose.Schema({
     enum: ['Open', 'Closed', 'Draft'],
     default: 'Open'
   },
-  applications: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'JobApplication'
-  }],
+  applications: {
+    type: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'JobApplication'
+    }],
+    default: []
+  },
   postedDate: {
     type: Date,
     default: Date.now
