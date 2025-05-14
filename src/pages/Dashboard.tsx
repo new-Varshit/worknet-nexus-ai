@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -5,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
-import { ChevronRight, Users, Clock, Briefcase } from "lucide-react";
+import { ChevronRight, Users, Clock, Briefcase, CheckCircle, CalendarDays, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, startOfMonth } from "date-fns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -127,12 +128,28 @@ const mockEmployeeTasks = [
   { id: 1, title: 'Complete project proposal', priority: 'High', dueDate: '2025-05-20', status: 'In Progress' },
   { id: 2, title: 'Submit monthly report', priority: 'Medium', dueDate: '2025-05-15', status: 'To Do' },
   { id: 3, title: 'Team meeting notes', priority: 'Low', dueDate: '2025-05-10', status: 'Completed' },
+  { id: 4, title: 'Review code changes', priority: 'High', dueDate: '2025-05-18', status: 'In Progress' },
+  { id: 5, title: 'Update documentation', priority: 'Medium', dueDate: '2025-05-22', status: 'To Do' },
 ];
 
 const mockEmployeeLeave = [
   { id: 1, type: 'Vacation', startDate: '2025-06-10', endDate: '2025-06-15', status: 'Pending' },
   { id: 2, type: 'Sick Leave', startDate: '2025-05-03', endDate: '2025-05-04', status: 'Approved' },
+  { id: 3, type: 'Personal Leave', startDate: '2025-07-15', endDate: '2025-07-16', status: 'Rejected' },
 ];
+
+const mockInternalJobs = [
+  { id: 1, title: "Senior Software Engineer", department: "Engineering", location: "Remote" },
+  { id: 2, title: "Marketing Specialist", department: "Marketing", location: "New York" },
+  { id: 3, title: "HR Manager", department: "Human Resources", location: "Chicago" },
+];
+
+const mockPayrollInfo = {
+  status: "Processed",
+  lastPayDate: "2025-04-30",
+  nextPayDate: "2025-05-31",
+  amount: "$4,250.00"
+};
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -150,6 +167,13 @@ const Dashboard = () => {
   };
 
   if (isEmployee) {
+    // Get count of completed tasks
+    const completedTasksCount = mockEmployeeTasks.filter(task => task.status === "Completed").length;
+    // Get count of approved leaves
+    const approvedLeavesCount = mockEmployeeLeave.filter(leave => leave.status === "Approved").length;
+    // Count of internal job opportunities
+    const internalJobsCount = mockInternalJobs.length;
+
     // Employee Dashboard View
     return (
       <div className="p-6 max-w-7xl mx-auto space-y-8">
@@ -160,27 +184,104 @@ const Dashboard = () => {
           </p>
         </div>
       
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Row 1: Overview Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle>My Attendance</CardTitle>
-              <CardDescription>This week's attendance record</CardDescription>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Briefcase className="h-5 w-5 text-primary" />
+                Total Tasks
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                {mockEmployeeAttendance.map((record, index) => (
-                  <div key={index} className="flex justify-between items-center py-1">
-                    <div className="flex items-center gap-2">
-                      {record.status === 'present' ? (
-                        <div className="h-2 w-2 rounded-full bg-green-500" />
-                      ) : record.status === 'absent' ? (
-                        <div className="h-2 w-2 rounded-full bg-red-500" />
-                      ) : (
-                        <div className="h-2 w-2 rounded-full bg-gray-300" />
-                      )}
-                      <span className="text-sm">{format(new Date(record.date), "MMM d, EEE")}</span>
+              <p className="text-3xl font-bold">{mockEmployeeTasks.length}</p>
+              <p className="text-sm text-muted-foreground mt-1">Assigned to you</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                Tasks Completed
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{completedTasksCount}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {completedTasksCount > 0 
+                  ? `${Math.round((completedTasksCount / mockEmployeeTasks.length) * 100)}% completion rate`
+                  : "No tasks completed yet"}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <CalendarDays className="h-5 w-5 text-blue-500" />
+                Leaves Taken
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{approvedLeavesCount}</p>
+              <p className="text-sm text-muted-foreground mt-1">Approved leaves this year</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Clock className="h-5 w-5 text-orange-500" />
+                Attendance
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">95%</p>
+              <p className="text-sm text-muted-foreground mt-1">Monthly attendance rate</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Row 2: Functional Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>My Tasks</CardTitle>
+              <CardDescription>Your recent task assignments</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {mockEmployeeTasks.slice(0, 5).map(task => (
+                  <div key={task.id} className="p-2 border rounded-md hover:bg-muted/50">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">{task.title}</span>
+                      <Badge
+                        variant={
+                          task.priority === "High"
+                            ? "destructive"
+                            : task.priority === "Medium"
+                            ? "default"
+                            : "outline"
+                        }
+                      >
+                        {task.priority}
+                      </Badge>
                     </div>
-                    <span className="text-sm text-muted-foreground">{record.time}</span>
+                    <div className="flex justify-between text-sm mt-1">
+                      <span className="text-muted-foreground">Due: {format(new Date(task.dueDate), "MMM d")}</span>
+                      <Badge
+                        variant={
+                          task.status === "Completed"
+                            ? "outline"
+                            : task.status === "In Progress"
+                            ? "secondary"
+                            : "default"
+                        }
+                      >
+                        {task.status}
+                      </Badge>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -188,55 +289,6 @@ const Dashboard = () => {
                 variant="outline" 
                 size="sm" 
                 className="w-full mt-4"
-                onClick={() => navigate("/attendance")}
-              >
-                View Full Attendance
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>My Tasks</CardTitle>
-              <CardDescription>Upcoming and recent tasks</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {mockEmployeeTasks.map(task => (
-                <div key={task.id} className="p-2 border rounded-md hover:bg-muted/50">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">{task.title}</span>
-                    <Badge
-                      variant={
-                        task.priority === "High"
-                          ? "destructive"
-                          : task.priority === "Medium"
-                          ? "default"
-                          : "outline"
-                      }
-                    >
-                      {task.priority}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between text-sm mt-1">
-                    <span className="text-muted-foreground">Due: {format(new Date(task.dueDate), "MMM d")}</span>
-                    <Badge
-                      variant={
-                        task.status === "Completed"
-                          ? "outline"
-                          : task.status === "In Progress"
-                          ? "secondary"
-                          : "default"
-                      }
-                    >
-                      {task.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full mt-2"
                 onClick={() => navigate("/tasks")}
               >
                 View All Tasks
@@ -246,8 +298,8 @@ const Dashboard = () => {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle>My Leave</CardTitle>
-              <CardDescription>Leave requests and balances</CardDescription>
+              <CardTitle>Leave Requests</CardTitle>
+              <CardDescription>Status of your leave applications</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3 mb-4">
@@ -273,42 +325,75 @@ const Dashboard = () => {
                   </div>
                 ))}
               </div>
-              <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full"
+                onClick={() => navigate("/leave/history")}
+              >
+                View Leave History
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Row 3: Utility Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>Internal Job Opportunities</CardTitle>
+              <CardDescription>Open positions you can apply for</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center justify-center py-4">
+                <div className="text-3xl font-bold mb-2">{internalJobsCount}</div>
+                <p className="text-center mb-4">openings available across the organization</p>
                 <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="flex-1"
-                  onClick={() => navigate("/leave/apply")}
+                  onClick={() => navigate("/recruitment/internal-jobs")}
+                  className="w-full sm:w-auto"
                 >
-                  Apply for Leave
+                  Browse Job Openings
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>Payroll Status</CardTitle>
+              <CardDescription>Your salary payment information</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Status:</span>
+                  <Badge variant={mockPayrollInfo.status === "Processed" ? "outline" : "secondary"}>
+                    {mockPayrollInfo.status}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Last Payment:</span>
+                  <span>{format(new Date(mockPayrollInfo.lastPayDate), "MMMM d, yyyy")}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Next Payment:</span>
+                  <span>{format(new Date(mockPayrollInfo.nextPayDate), "MMMM d, yyyy")}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Amount:</span>
+                  <span className="font-bold">{mockPayrollInfo.amount}</span>
+                </div>
                 <Button 
                   variant="outline" 
-                  size="sm" 
-                  className="flex-1"
-                  onClick={() => navigate("/leave/history")}
+                  className="w-full mt-2"
+                  onClick={() => navigate("/payroll")}
                 >
-                  Leave History
+                  View Payroll History
                 </Button>
               </div>
             </CardContent>
           </Card>
         </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Calendar</CardTitle>
-            <CardDescription>Your upcoming events and important dates</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(date) => date && setDate(date)}
-              className="rounded-md border"
-            />
-          </CardContent>
-        </Card>
       </div>
     );
   }
