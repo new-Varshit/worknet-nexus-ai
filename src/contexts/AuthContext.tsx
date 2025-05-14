@@ -12,6 +12,7 @@ export interface User {
   avatar?: string;
   department?: string;
   position?: string;
+  dateOfBirth?: string; // Added the missing dateOfBirth property
 }
 
 interface AuthContextType {

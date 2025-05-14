@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,8 +14,62 @@ import {
   CircleCheck, CircleDashed, Mail, MessageSquare, Bell, ListChecks
 } from "lucide-react";
 
+// Define admin analytics data type
+interface AdminAnalyticsData {
+  totalEmployees: number;
+  newEmployees: number;
+  totalHR: number;
+  activeJobs: number;
+  pendingLeaveRequests: number;
+  employeeGrowthRate: number;
+  departmentDistribution: { name: string; value: number; }[];
+  employeesByMonth: { month: string; count: number; }[];
+  taskCompletionRate: number;
+  payrollTotal: number;
+}
+
+// Define HR analytics data type
+interface HRAnalyticsData {
+  teamSize: number;
+  jobPosts: number;
+  pendingLeaveRequests: number;
+  assignedTasks: number;
+  taskCompletionRate: number;
+  employeesByDepartment: { name: string; value: number; }[];
+  recentHires: number;
+  upcomingReviews: number;
+  recruitmentFunnel: {
+    applications: number;
+    interviews: number;
+    offers: number;
+    acceptances: number;
+  };
+}
+
+// Define employee analytics data type
+interface EmployeeAnalyticsData {
+  tasksCompleted: number;
+  tasksInProgress: number;
+  tasksDue: number;
+  taskProgress: number;
+  attendancePercentage: number;
+  attendanceStreak: number;
+  teamAttendance: number;
+  leaveDaysRemaining: number;
+  pendingLeaveRequests: number;
+  leavesApproved: number;
+  internalJobsOpen: number;
+  internalJobsApplied: number;
+  upcomingDeadlines: number;
+  payrollStatus: string;
+  upcomingReview: string;
+}
+
+// Define a union type for all analytics data
+type AnalyticsData = AdminAnalyticsData | HRAnalyticsData | EmployeeAnalyticsData;
+
 // Mock data for admin dashboard
-const adminAnalyticsData = {
+const adminAnalyticsData: AdminAnalyticsData = {
   totalEmployees: 124,
   newEmployees: 8,
   totalHR: 5,
@@ -42,7 +97,7 @@ const adminAnalyticsData = {
 };
 
 // Mock data for HR dashboard
-const hrAnalyticsData = {
+const hrAnalyticsData: HRAnalyticsData = {
   teamSize: 45,
   jobPosts: 8,
   pendingLeaveRequests: 5,
@@ -64,7 +119,7 @@ const hrAnalyticsData = {
 };
 
 // Mock data for employee dashboard
-const employeeAnalyticsData = {
+const employeeAnalyticsData: EmployeeAnalyticsData = {
   tasksCompleted: 18,
   tasksInProgress: 5,
   tasksDue: 3,
@@ -86,7 +141,7 @@ const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
-  const [data, setData] = useState(adminAnalyticsData);
+  const [data, setData] = useState<AnalyticsData>(adminAnalyticsData);
 
   useEffect(() => {
     // Set appropriate data based on user role
