@@ -10,12 +10,16 @@ interface LeaveRequestDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   request: any;
+  onApprove?: (id: number) => void;
+  onReject?: (id: number) => void;
 }
 
 const LeaveRequestDialog = ({
   open,
   onOpenChange,
   request,
+  onApprove,
+  onReject,
 }: LeaveRequestDialogProps) => {
   if (!request) return null;
   
