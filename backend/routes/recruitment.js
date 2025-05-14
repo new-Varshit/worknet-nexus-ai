@@ -6,6 +6,7 @@ const { auth, authorize } = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
@@ -323,6 +324,11 @@ router.post('/applications', upload.single('resume'), async (req, res) => {
     }
     
     await application.save();
+    
+    // Make sure job.applications is initialized
+    if (!job.applications) {
+      job.applications = [];
+    }
     
     // Add to job's applications array
     job.applications.push(application._id);

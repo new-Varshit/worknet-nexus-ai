@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,8 +38,25 @@ import { useForm } from "react-hook-form";
 import ResumeParser from "@/components/recruitment/ResumeParser";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Mock job postings data
-const initialJobs = [
+// Define JobType interface with all required properties
+type JobType = {
+  id: number;
+  title: string;
+  department: string;
+  location: string;
+  type: string;
+  description: string;
+  requirements: string[];
+  salary: { min: number; max: number; currency: string };
+  isInternal: boolean;
+  postedDate: string;
+  closingDate: string;
+  status: string;
+  applications: number | undefined;
+};
+
+// Mock job postings data with safe initialization
+const initialJobs: JobType[] = [
   {
     id: 1,
     title: "Senior Software Engineer",
@@ -117,22 +133,6 @@ const initialJobs = [
     applications: 6
   }
 ];
-
-type JobType = {
-  id: number;
-  title: string;
-  department: string;
-  location: string;
-  type: string;
-  description: string;
-  requirements: string[];
-  salary: { min: number; max: number; currency: string };
-  isInternal: boolean;
-  postedDate: string;
-  closingDate: string;
-  status: string;
-  applications: number;
-};
 
 type FormValues = {
   title: string;
@@ -388,7 +388,7 @@ const JobPostings = () => {
                       <div className="flex items-center gap-2">
                         <Button variant="outline" size="sm">
                           <Eye className="mr-1 h-4 w-4" />
-                          <span>Applications ({job.applications})</span>
+                          <span>Applications ({job.applications || 0})</span>
                         </Button>
                       </div>
                     </div>
