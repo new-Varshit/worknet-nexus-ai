@@ -15,9 +15,10 @@ import { toast } from "sonner";
 interface TaskCardProps {
   task: any;
   onEdit: () => void;
+  isEmployeeView: boolean;
 }
 
-const TaskCard = ({ task, onEdit }: TaskCardProps) => {
+const TaskCard = ({ task, onEdit, isEmployeeView }: TaskCardProps) => {
   const handleStatusChange = (newStatus: string) => {
     // Here would be API call to update task status
     toast.success(`Task status updated to ${newStatus}`);
@@ -31,6 +32,8 @@ const TaskCard = ({ task, onEdit }: TaskCardProps) => {
         return <Clock className="h-4 w-4 text-blue-500" />;
       case "Completed":
         return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+      case "Not Completed":
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
       default:
         return <Circle className="h-4 w-4 text-muted-foreground" />;
     }
@@ -91,15 +94,15 @@ const TaskCard = ({ task, onEdit }: TaskCardProps) => {
           
           <div className="flex items-center gap-2 text-sm">
             <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs text-primary font-medium">
-              {task.assignedTo.name.split(" ").map((n: string) => n[0]).join("")}
+              {task.assignedBy.name.split(" ").map((n: string) => n[0]).join("")}
             </div>
-            <span className="text-muted-foreground">{task.assignedTo.name}</span>
+            <span className="text-muted-foreground">Assigned by: {task.assignedBy.name}</span>
           </div>
           
           {task.comments.length > 0 && (
             <div className="flex items-center gap-2 text-sm">
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">{task.comments.length} comment{task.comments.length !== 1 ? 's' : ''}</span>
+              <span className="text-muted-foreground">{task.comments.length} query/responses</span>
             </div>
           )}
         </div>
@@ -114,41 +117,77 @@ const TaskCard = ({ task, onEdit }: TaskCardProps) => {
           View Details
         </Button>
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Actions</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onEdit}>
-              Edit Task
-            </DropdownMenuItem>
-            
-            {task.status !== "To Do" && (
-              <DropdownMenuItem onClick={() => handleStatusChange("To Do")}>
-                Mark as To Do
+        {isEmployeeView ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Actions</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {task.status !== "To Do" && (
+                <DropdownMenuItem onClick={() => handleStatusChange("To Do")}>
+                  Mark as To Do
+                </DropdownMenuItem>
+              )}
+              
+              {task.status !== "In Progress" && (
+                <DropdownMenuItem onClick={() => handleStatusChange("In Progress")}>
+                  Mark as In Progress
+                </DropdownMenuItem>
+              )}
+              
+              {task.status !== "Completed" && (
+                <DropdownMenuItem onClick={() => handleStatusChange("Completed")}>
+                  Mark as Completed
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Actions</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={onEdit}>
+                Edit Task
               </DropdownMenuItem>
-            )}
-            
-            {task.status !== "In Progress" && (
-              <DropdownMenuItem onClick={() => handleStatusChange("In Progress")}>
-                Mark as In Progress
+              
+              {task.status !== "To Do" && (
+                <DropdownMenuItem onClick={() => handleStatusChange("To Do")}>
+                  Mark as To Do
+                </DropdownMenuItem>
+              )}
+              
+              {task.status !== "In Progress" && (
+                <DropdownMenuItem onClick={() => handleStatusChange("In Progress")}>
+                  Mark as In Progress
+                </DropdownMenuItem>
+              )}
+              
+              {task.status !== "Completed" && (
+                <DropdownMenuItem onClick={() => handleStatusChange("Completed")}>
+                  Mark as Completed
+                </DropdownMenuItem>
+              )}
+              
+              {task.status !== "Not Completed" && (
+                <DropdownMenuItem onClick={() => handleStatusChange("Not Completed")}>
+                  Mark as Not Completed
+                </DropdownMenuItem>
+              )}
+              
+              <DropdownMenuItem className="text-destructive focus:text-destructive">
+                Delete Task
               </DropdownMenuItem>
-            )}
-            
-            {task.status !== "Completed" && (
-              <DropdownMenuItem onClick={() => handleStatusChange("Completed")}>
-                Mark as Completed
-              </DropdownMenuItem>
-            )}
-            
-            <DropdownMenuItem className="text-destructive focus:text-destructive">
-              Delete Task
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </CardFooter>
     </Card>
   );

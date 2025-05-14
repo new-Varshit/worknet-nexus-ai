@@ -10,76 +10,11 @@ import {
   ArrowUpRight, Users, UserPlus, Briefcase, Calendar, CheckCircle2, Clock, 
   FileText, BarChart, PieChart, DollarSign, TrendingUp, TrendingDown, 
   FileCheck, AlertCircle, User, Building, ChevronRight, UserCheck, FileSpreadsheet,
-  CircleCheck, CircleDashed, Mail, MessageSquare, Bell
+  CircleCheck, CircleDashed, Mail, MessageSquare, Bell, ListChecks
 } from "lucide-react";
-import {
-  AreaChart,
-  Area,
-  BarChart as RechartsBarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell,
-} from "recharts";
-
-type AdminAnalyticsData = {
-  totalEmployees: number;
-  newEmployees: number;
-  totalHR: number;
-  activeJobs: number;
-  pendingLeaveRequests: number;
-  employeeGrowthRate: number;
-  departmentDistribution: Array<{ name: string; value: number }>;
-  employeesByMonth: Array<{ month: string; count: number }>;
-  taskCompletionRate: number;
-  payrollTotal: number;
-};
-
-type HRAnalyticsData = {
-  teamSize: number;
-  jobPosts: number;
-  pendingLeaveRequests: number;
-  assignedTasks: number;
-  taskCompletionRate: number;
-  employeesByDepartment: Array<{ name: string; value: number }>;
-  recentHires: number;
-  upcomingReviews: number;
-  recruitmentFunnel: {
-    applications: number;
-    interviews: number;
-    offers: number;
-    acceptances: number;
-  };
-};
-
-type EmployeeAnalyticsData = {
-  tasksCompleted: number;
-  tasksInProgress: number;
-  tasksDue: number;
-  taskProgress: number;
-  attendancePercentage: number;
-  attendanceStreak: number;
-  teamAttendance: number;
-  leaveDaysRemaining: number;
-  pendingLeaveRequests: number;
-  leavesApproved: number;
-  internalJobsOpen: number;
-  internalJobsApplied: number;
-  upcomingDeadlines: number;
-  payrollStatus: string;
-  upcomingReview: string;
-};
-
-type AnalyticsData = AdminAnalyticsData | HRAnalyticsData | EmployeeAnalyticsData;
 
 // Mock data for admin dashboard
-const adminAnalyticsData: AdminAnalyticsData = {
+const adminAnalyticsData = {
   totalEmployees: 124,
   newEmployees: 8,
   totalHR: 5,
@@ -107,7 +42,7 @@ const adminAnalyticsData: AdminAnalyticsData = {
 };
 
 // Mock data for HR dashboard
-const hrAnalyticsData: HRAnalyticsData = {
+const hrAnalyticsData = {
   teamSize: 45,
   jobPosts: 8,
   pendingLeaveRequests: 5,
@@ -129,7 +64,7 @@ const hrAnalyticsData: HRAnalyticsData = {
 };
 
 // Mock data for employee dashboard
-const employeeAnalyticsData: EmployeeAnalyticsData = {
+const employeeAnalyticsData = {
   tasksCompleted: 18,
   tasksInProgress: 5,
   tasksDue: 3,
@@ -151,7 +86,7 @@ const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
-  const [data, setData] = useState<AnalyticsData>(adminAnalyticsData);
+  const [data, setData] = useState(adminAnalyticsData);
 
   useEffect(() => {
     // Set appropriate data based on user role
@@ -240,30 +175,9 @@ const Dashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={adminAnalyticsData.employeesByMonth}
-                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-              >
-                <defs>
-                  <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="month" />
-                <YAxis />
-                <CartesianGrid strokeDasharray="3 3" />
-                <Tooltip />
-                <Area
-                  type="monotone"
-                  dataKey="count"
-                  stroke="#8884d8"
-                  fillOpacity={1}
-                  fill="url(#colorCount)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            <div className="flex items-center justify-center">
+              <p>Employee growth chart will be here.</p>
+            </div>
           </CardContent>
         </Card>
 
@@ -273,26 +187,9 @@ const Dashboard = () => {
             <CardDescription>Employee count by department</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <RechartsPieChart>
-                <Pie
-                  data={adminAnalyticsData.departmentDistribution}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  paddingAngle={5}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                >
-                  {adminAnalyticsData.departmentDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={`hsl(${index * 45}, 70%, 60%)`} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </RechartsPieChart>
-            </ResponsiveContainer>
+            <div className="flex items-center justify-center">
+              <p>Department distribution chart will be here.</p>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -305,30 +202,9 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-center py-8">
-              <div className="relative h-40 w-40">
-                <CircleDashed className="h-40 w-40 absolute text-muted-foreground/20" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-4xl font-bold">{adminAnalyticsData.taskCompletionRate}%</div>
-                    <div className="text-sm text-muted-foreground">Completed</div>
-                  </div>
-                </div>
-                <svg
-                  className="h-40 w-40 absolute"
-                  viewBox="0 0 100 100"
-                >
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="10"
-                    strokeDasharray={`${adminAnalyticsData.taskCompletionRate * 2.83} 283`}
-                    strokeLinecap="round"
-                    className="text-primary transform -rotate-90 origin-center"
-                  />
-                </svg>
+              <div className="text-center">
+                <div className="text-4xl font-bold">{adminAnalyticsData.taskCompletionRate}%</div>
+                <div className="text-sm text-muted-foreground">Completed</div>
               </div>
             </div>
             <Button variant="outline" className="w-full" onClick={() => navigate("/tasks")}>
@@ -350,20 +226,6 @@ const Dashboard = () => {
               </div>
               <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
                 <DollarSign className="h-6 w-6" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <div>Average Salary</div>
-                <div className="font-medium">${Math.round(adminAnalyticsData.payrollTotal / adminAnalyticsData.totalEmployees).toLocaleString()}</div>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <div>Last Processed</div>
-                <div className="font-medium">May 28, 2025</div>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <div>Next Payroll</div>
-                <div className="font-medium">June 28, 2025</div>
               </div>
             </div>
             <Button variant="outline" className="w-full" onClick={() => navigate("/payroll")}>
@@ -458,18 +320,9 @@ const Dashboard = () => {
             <CardDescription>Employees by department</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <RechartsBarChart
-                data={(data as HRAnalyticsData).employeesByDepartment}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" fill="#8884d8" name="Employees" />
-              </RechartsBarChart>
-            </ResponsiveContainer>
+            <div className="flex items-center justify-center">
+              <p>Team composition chart will be here.</p>
+            </div>
           </CardContent>
         </Card>
 
@@ -497,32 +350,6 @@ const Dashboard = () => {
                 <div className="text-xs text-muted-foreground">Hires</div>
               </div>
             </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="text-sm">Applications to Interviews</div>
-                <div className="text-sm font-medium">
-                  {Math.round((data as HRAnalyticsData).recruitmentFunnel.interviews / (data as HRAnalyticsData).recruitmentFunnel.applications * 100)}%
-                </div>
-              </div>
-              <Progress value={(data as HRAnalyticsData).recruitmentFunnel.interviews / (data as HRAnalyticsData).recruitmentFunnel.applications * 100} className="h-2" />
-              
-              <div className="flex items-center justify-between">
-                <div className="text-sm">Interviews to Offers</div>
-                <div className="text-sm font-medium">
-                  {Math.round((data as HRAnalyticsData).recruitmentFunnel.offers / (data as HRAnalyticsData).recruitmentFunnel.interviews * 100)}%
-                </div>
-              </div>
-              <Progress value={(data as HRAnalyticsData).recruitmentFunnel.offers / (data as HRAnalyticsData).recruitmentFunnel.interviews * 100} className="h-2" />
-              
-              <div className="flex items-center justify-between">
-                <div className="text-sm">Offers to Acceptances</div>
-                <div className="text-sm font-medium">
-                  {Math.round((data as HRAnalyticsData).recruitmentFunnel.acceptances / (data as HRAnalyticsData).recruitmentFunnel.offers * 100)}%
-                </div>
-              </div>
-              <Progress value={(data as HRAnalyticsData).recruitmentFunnel.acceptances / (data as HRAnalyticsData).recruitmentFunnel.offers * 100} className="h-2" />
-            </div>
           </CardContent>
         </Card>
       </div>
@@ -535,30 +362,9 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-center py-8">
-              <div className="relative h-40 w-40">
-                <CircleDashed className="h-40 w-40 absolute text-muted-foreground/20" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-4xl font-bold">{(data as HRAnalyticsData).taskCompletionRate}%</div>
-                    <div className="text-sm text-muted-foreground">Completed</div>
-                  </div>
-                </div>
-                <svg
-                  className="h-40 w-40 absolute"
-                  viewBox="0 0 100 100"
-                >
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="10"
-                    strokeDasharray={`${(data as HRAnalyticsData).taskCompletionRate * 2.83} 283`}
-                    strokeLinecap="round"
-                    className="text-primary transform -rotate-90 origin-center"
-                  />
-                </svg>
+              <div className="text-center">
+                <div className="text-4xl font-bold">{(data as HRAnalyticsData).taskCompletionRate}%</div>
+                <div className="text-sm text-muted-foreground">Completed</div>
               </div>
             </div>
             <Button variant="outline" className="w-full" onClick={() => navigate("/tasks")}>
@@ -603,34 +409,8 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common HR tasks</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/employees")}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add New Employee
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/recruitment/jobs")}>
-              <Briefcase className="mr-2 h-4 w-4" />
-              Create Job Posting
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/tasks")}>
-              <CheckCircle2 className="mr-2 h-4 w-4" />
-              Assign New Task
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/leave/requests")}>
-              <FileCheck className="mr-2 h-4 w-4" />
-              Review Leave Requests
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/payroll")}>
-              <FileSpreadsheet className="mr-2 h-4 w-4" />
-              Process Payroll
+            <Button variant="outline" className="w-full">
+              View All Activities
             </Button>
           </CardContent>
         </Card>
@@ -827,48 +607,25 @@ const Dashboard = () => {
         
         <Card className="shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Status & Updates</CardTitle>
+            <CardTitle className="text-sm font-medium">Payroll Status</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm">
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
-                <span>Payroll Status</span>
+                <span>Last Processed</span>
               </div>
               <div className="text-sm font-medium">{(data as EmployeeAnalyticsData).payrollStatus}</div>
             </div>
             
-            {(data as EmployeeAnalyticsData).upcomingReview && (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>Performance Review</span>
-                </div>
-                <div className="text-sm font-medium">{(data as EmployeeAnalyticsData).upcomingReview}</div>
-              </div>
-            )}
-            
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm">
-                <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                <span>Unread Messages</span>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span>Next Payment Date</span>
               </div>
-              <Badge>3</Badge>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm">
-                <Bell className="h-4 w-4 text-muted-foreground" />
-                <span>Notifications</span>
-              </div>
-              <Badge>2</Badge>
+              <div className="text-sm font-medium">June 10, 2025</div>
             </div>
           </CardContent>
-          <CardFooter>
-            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/profile")}>
-              View Profile
-            </Button>
-          </CardFooter>
         </Card>
       </div>
     </div>
@@ -886,8 +643,6 @@ const Dashboard = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
           </TabsList>
           
@@ -901,30 +656,6 @@ const Dashboard = () => {
             )}
           </TabsContent>
           
-          <TabsContent value="analytics">
-            <Card>
-              <CardHeader>
-                <CardTitle>Analytics</CardTitle>
-                <CardDescription>View detailed analytics for your department</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>Analytics content will appear here</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="reports">
-            <Card>
-              <CardHeader>
-                <CardTitle>Reports</CardTitle>
-                <CardDescription>View and generate reports</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>Reports content will appear here</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
           <TabsContent value="notifications">
             <Card>
               <CardHeader>
@@ -932,7 +663,51 @@ const Dashboard = () => {
                 <CardDescription>Your recent notifications</CardDescription>
               </CardHeader>
               <CardContent>
-                <p>Notifications will appear here</p>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                    <div className="mt-0.5 bg-blue-100 dark:bg-blue-900 p-2 rounded-full">
+                      <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium">New comment on your task</p>
+                      <p className="text-sm text-muted-foreground">Sarah responded to your query on the "Update Documentation" task</p>
+                      <p className="text-xs text-muted-foreground mt-1">10 minutes ago</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                    <div className="mt-0.5 bg-green-100 dark:bg-green-900 p-2 rounded-full">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Task assigned</p>
+                      <p className="text-sm text-muted-foreground">You have been assigned a new task: "Prepare Quarterly Report"</p>
+                      <p className="text-xs text-muted-foreground mt-1">2 hours ago</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                    <div className="mt-0.5 bg-purple-100 dark:bg-purple-900 p-2 rounded-full">
+                      <Briefcase className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Internal job application update</p>
+                      <p className="text-sm text-muted-foreground">Your application for Senior Developer has been received</p>
+                      <p className="text-xs text-muted-foreground mt-1">Yesterday</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                    <div className="mt-0.5 bg-orange-100 dark:bg-orange-900 p-2 rounded-full">
+                      <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Task edited</p>
+                      <p className="text-sm text-muted-foreground">The task "Client Meeting Preparation" has been updated by HR</p>
+                      <p className="text-xs text-muted-foreground mt-1">2 days ago</p>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

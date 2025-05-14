@@ -1,12 +1,14 @@
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -18,325 +20,291 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
-import { Circle, Clock, CheckCircle2, Send } from "lucide-react";
-
-// Mock user data for assignee selection
-const mockUsers = [
-  { id: 1, name: "John Doe", email: "john.doe@example.com" },
-  { id: 2, name: "Jane Smith", email: "jane.smith@example.com" },
-  { id: 3, name: "Emily Brown", email: "emily.b@example.com" },
-  { id: 4, name: "Michael Johnson", email: "michael.j@example.com" },
-  { id: 5, name: "Robert Wilson", email: "robert.w@example.com" },
-  { id: 6, name: "Sarah Davis", email: "sarah.d@example.com" },
-];
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon, MessageSquare } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 interface TaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  task?: any;
-  onSave?: (task: any) => void;
+  task: any | null;
+  onSave: (task: any) => void;
+  isEmployeeView: boolean;
 }
 
-const TaskDialog = ({
-  open,
-  onOpenChange,
-  task,
-  onSave,
-}: TaskDialogProps) => {
+const TaskDialog = ({ open, onOpenChange, task, onSave, isEmployeeView }: TaskDialogProps) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
-    id: "",
     title: "",
     description: "",
     status: "To Do",
     priority: "Medium",
-    dueDate: "",
+    dueDate: new Date(),
     assignedTo: "",
-    comments: [] as any[],
   });
-  
-  const [newComment, setNewComment] = useState("");
+  const [comment, setComment] = useState("");
+  const [date, setDate] = useState<Date>();
   
   useEffect(() => {
     if (task) {
       setFormData({
-        id: task.id || "",
-        title: task.title || "",
-        description: task.description || "",
-        status: task.status || "To Do",
-        priority: task.priority || "Medium",
-        dueDate: task.dueDate || "",
-        assignedTo: task.assignedTo?.id?.toString() || "",
-        comments: task.comments || [],
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        priority: task.priority,
+        dueDate: new Date(task.dueDate),
+        assignedTo: task.assignedTo.id.toString(),
       });
+      setDate(new Date(task.dueDate));
     } else {
-      // Reset form for new task
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      
       setFormData({
-        id: "",
         title: "",
         description: "",
         status: "To Do",
         priority: "Medium",
-        dueDate: format(tomorrow, "yyyy-MM-dd"),
-        assignedTo: "",
-        comments: [],
+        dueDate: new Date(),
+        assignedTo: user?.id || "",
       });
+      setDate(new Date());
     }
-    
-    setNewComment("");
-  }, [task, open]);
-  
+    setComment("");
+  }, [task, user]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
-  
+
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
-  
+
+  const handleDateChange = (selectedDate: Date | undefined) => {
+    if (selectedDate) {
+      setDate(selectedDate);
+      setFormData(prev => ({ ...prev, dueDate: selectedDate }));
+    }
+  };
+
+  const handleCommentSubmit = () => {
+    if (!comment.trim()) {
+      toast.error("Please enter a query before submitting.");
+      return;
+    }
+
+    // Here would be API call to add comment
+    toast.success("Query submitted successfully.");
+    setComment("");
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSave) {
-      // Format the data to match API expectations
-      const formattedTask = {
-        ...formData,
-        assignedTo: mockUsers.find(u => u.id.toString() === formData.assignedTo),
-      };
-      onSave(formattedTask);
-    }
+    onSave({ ...task, ...formData });
+    toast.success(`Task ${task ? "updated" : "created"} successfully.`);
   };
-  
-  const handleAddComment = () => {
-    if (!newComment.trim()) return;
-    
-    const comment = {
-      id: Date.now(),
-      user: {
-        id: 1, // Current user ID
-        name: "John Doe", // Current user name
-      },
-      text: newComment,
-      date: new Date().toISOString(),
-    };
-    
-    setFormData(prev => ({
-      ...prev,
-      comments: [...prev.comments, comment],
-    }));
-    
-    setNewComment("");
+
+  const isFormValid = () => {
+    return formData.title && formData.description && formData.status && formData.priority && formData.dueDate;
   };
-  
-  // Helper function to get initials from name
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
-  };
-  
-  // Get status icon
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "To Do":
-        return <Circle className="h-4 w-4" />;
-      case "In Progress":
-        return <Clock className="h-4 w-4" />;
-      case "Completed":
-        return <CheckCircle2 className="h-4 w-4" />;
-      default:
-        return null;
-    }
-  };
-  
-  // Format comment date
-  const formatCommentDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return format(date, "MMM d, yyyy 'at' h:mm a");
-  };
-  
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {task ? "Edit Task" : "Create New Task"}
-          </DialogTitle>
+          <DialogTitle>{task ? "Task Details" : "Create New Task"}</DialogTitle>
+          <DialogDescription>
+            {task ? "View or update the task details." : "Fill in the details to create a new task."}
+          </DialogDescription>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Task Title *</Label>
-            <Input
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              placeholder="Enter task title"
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Enter task description"
-              rows={3}
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="status">Status *</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) => handleSelectChange("status", value)}
-              >
-                <SelectTrigger id="status">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="To Do">
-                    <div className="flex items-center">
-                      <Circle className="mr-2 h-4 w-4" />
-                      <span>To Do</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="In Progress">
-                    <div className="flex items-center">
-                      <Clock className="mr-2 h-4 w-4" />
-                      <span>In Progress</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="Completed">
-                    <div className="flex items-center">
-                      <CheckCircle2 className="mr-2 h-4 w-4" />
-                      <span>Completed</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="priority">Priority *</Label>
-              <Select
-                value={formData.priority}
-                onValueChange={(value) => handleSelectChange("priority", value)}
-              >
-                <SelectTrigger id="priority">
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Low">Low</SelectItem>
-                  <SelectItem value="Medium">Medium</SelectItem>
-                  <SelectItem value="High">High</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="dueDate">Due Date *</Label>
-              <Input
-                id="dueDate"
-                name="dueDate"
-                type="date"
-                value={formData.dueDate}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="assignedTo">Assigned To *</Label>
-              <Select
-                value={formData.assignedTo}
-                onValueChange={(value) => handleSelectChange("assignedTo", value)}
-              >
-                <SelectTrigger id="assignedTo">
-                  <SelectValue placeholder="Select assignee" />
-                </SelectTrigger>
-                <SelectContent>
-                  {mockUsers.map((user) => (
-                    <SelectItem key={user.id} value={user.id.toString()}>
-                      {user.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          {formData.id && (
-            <>
-              <Separator className="my-4" />
-              
-              <div className="space-y-4">
-                <Label>Comments</Label>
-                
-                <div className="space-y-4 max-h-[200px] overflow-y-auto">
-                  {formData.comments.length > 0 ? (
-                    formData.comments.map((comment) => (
-                      <div key={comment.id} className="flex gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                            {getInitials(comment.user.name)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <div className="flex justify-between">
-                            <p className="text-sm font-medium">{comment.user.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {formatCommentDate(comment.date)}
-                            </p>
-                          </div>
-                          <p className="text-sm mt-1">{comment.text}</p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No comments yet</p>
-                  )}
+
+        <div className="space-y-6">
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4 md:col-span-2">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    placeholder="Task title"
+                    disabled={isEmployeeView}
+                  />
                 </div>
                 
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Add a comment..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    className="flex-1"
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Task description"
+                    rows={4}
+                    disabled={isEmployeeView}
                   />
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="default"
-                    onClick={handleAddComment}
-                    disabled={!newComment.trim()}
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
                 </div>
               </div>
-            </>
+
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => handleSelectChange("status", value)}
+                >
+                  <SelectTrigger id="status">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="To Do">To Do</SelectItem>
+                    <SelectItem value="In Progress">In Progress</SelectItem>
+                    <SelectItem value="Completed">Completed</SelectItem>
+                    {!isEmployeeView && (
+                      <SelectItem value="Not Completed">Not Completed</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="priority">Priority</Label>
+                <Select
+                  value={formData.priority}
+                  onValueChange={(value) => handleSelectChange("priority", value)}
+                  disabled={isEmployeeView}
+                >
+                  <SelectTrigger id="priority">
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Low">Low</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="High">High</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="dueDate">Due Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal"
+                      disabled={isEmployeeView}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={handleDateChange}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {!isEmployeeView && (
+                <div className="space-y-2">
+                  <Label htmlFor="assignedTo">Assigned To</Label>
+                  <Select
+                    value={formData.assignedTo}
+                    onValueChange={(value) => handleSelectChange("assignedTo", value)}
+                  >
+                    <SelectTrigger id="assignedTo">
+                      <SelectValue placeholder="Select employee" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">John Doe</SelectItem>
+                      <SelectItem value="2">Jane Smith</SelectItem>
+                      <SelectItem value="3">Emily Brown</SelectItem>
+                      <SelectItem value="5">Robert Wilson</SelectItem>
+                      <SelectItem value="6">Sarah Davis</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {task && (
+                <div className="space-y-2">
+                  <Label>Assigned By</Label>
+                  <div className="flex items-center gap-2 px-3 py-2 border rounded-md">
+                    <Avatar className="h-6 w-6">
+                      <AvatarFallback>{task.assignedBy.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span>{task.assignedBy.name}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {!isEmployeeView && (
+              <DialogFooter className="mt-6">
+                <Button type="submit" disabled={!isFormValid()}>
+                  {task ? "Update Task" : "Create Task"}
+                </Button>
+              </DialogFooter>
+            )}
+          </form>
+
+          {task && (
+            <div className="border-t pt-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  Query Section
+                </h3>
+                <Badge variant="outline">
+                  {task.comments.length} {task.comments.length === 1 ? "Query/Response" : "Queries/Responses"}
+                </Badge>
+              </div>
+
+              <div className="space-y-4 max-h-60 overflow-y-auto p-1">
+                {task.comments.length > 0 ? (
+                  task.comments.map((comment: any) => (
+                    <div key={comment.id} className="bg-muted/50 rounded-lg p-4 space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarFallback>{comment.user.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium">{comment.user.name}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(comment.date), "MMM d, yyyy 'at' h:mm a")}
+                        </span>
+                      </div>
+                      <p className="text-sm">{comment.text}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-muted-foreground text-sm py-4">No queries or responses yet.</p>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <Textarea
+                  placeholder="Ask a question about this task..."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  className="flex-1"
+                />
+                <Button onClick={handleCommentSubmit} variant="secondary" disabled={!comment.trim()}>
+                  Submit Query
+                </Button>
+              </div>
+            </div>
           )}
-          
-          <DialogFooter className="mt-6">
-            <Button type="submit" className="btn-gradient">
-              {task ? "Update Task" : "Create Task"}
-            </Button>
-          </DialogFooter>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ChevronRight,
   Menu,
+  Briefcase,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -107,6 +108,12 @@ const menuItems: MenuItem[] = [
         roles: ["admin", "hr", "employee"],
       },
     ],
+  },
+  {
+    title: "Internal Job Posting",
+    icon: <Briefcase className="h-5 w-5" />,
+    path: "/recruitment/internal",
+    roles: ["employee"],
   },
 ];
 
