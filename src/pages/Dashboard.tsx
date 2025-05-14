@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsItem, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -142,22 +142,22 @@ const Dashboard = () => {
           title="Employees"
           value="50"
           description="Total employees"
-          trend="+2 this month"
-          trendDirection="up"
+          changeValue="+2 this month"
+          changeType="increase"
         />
         <StatCard
           title="Attendance"
           value="95%"
           description="Average attendance"
-          trend="+2% from last month"
-          trendDirection="up"
+          changeValue="+2% from last month"
+          changeType="increase"
         />
         <StatCard
           title="Open Positions"
           value="8"
           description="Job openings"
-          trend="+3 this week"
-          trendDirection="up"
+          changeValue="+3 this week"
+          changeType="increase"
         />
       </div>
 
