@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -114,11 +113,33 @@ const mockLeaveRequests = [
   },
 ];
 
+const mockEmployeeAttendance = [
+  { date: '2025-05-01', status: 'present', time: '8:55 AM - 5:05 PM' },
+  { date: '2025-05-02', status: 'present', time: '9:00 AM - 5:00 PM' },
+  { date: '2025-05-03', status: 'weekend', time: '-' },
+  { date: '2025-05-04', status: 'weekend', time: '-' },
+  { date: '2025-05-05', status: 'present', time: '8:45 AM - 5:15 PM' },
+  { date: '2025-05-06', status: 'present', time: '9:00 AM - 5:00 PM' },
+  { date: '2025-05-07', status: 'present', time: '8:50 AM - 5:10 PM' },
+];
+
+const mockEmployeeTasks = [
+  { id: 1, title: 'Complete project proposal', priority: 'High', dueDate: '2025-05-20', status: 'In Progress' },
+  { id: 2, title: 'Submit monthly report', priority: 'Medium', dueDate: '2025-05-15', status: 'To Do' },
+  { id: 3, title: 'Team meeting notes', priority: 'Low', dueDate: '2025-05-10', status: 'Completed' },
+];
+
+const mockEmployeeLeave = [
+  { id: 1, type: 'Vacation', startDate: '2025-06-10', endDate: '2025-06-15', status: 'Pending' },
+  { id: 2, type: 'Sick Leave', startDate: '2025-05-03', endDate: '2025-05-04', status: 'Approved' },
+];
+
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [date, setDate] = useState(new Date());
   const [activeTab, setActiveTab] = useState("overview");
+  const isEmployee = user?.role === "employee";
 
   const getInitials = (name: string) => {
     return name
@@ -128,6 +149,171 @@ const Dashboard = () => {
       .toUpperCase();
   };
 
+  if (isEmployee) {
+    // Employee Dashboard View
+    return (
+      <div className="p-6 max-w-7xl mx-auto space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome back, {user?.name || "User"}
+          </p>
+        </div>
+      
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>My Attendance</CardTitle>
+              <CardDescription>This week's attendance record</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {mockEmployeeAttendance.map((record, index) => (
+                  <div key={index} className="flex justify-between items-center py-1">
+                    <div className="flex items-center gap-2">
+                      {record.status === 'present' ? (
+                        <div className="h-2 w-2 rounded-full bg-green-500" />
+                      ) : record.status === 'absent' ? (
+                        <div className="h-2 w-2 rounded-full bg-red-500" />
+                      ) : (
+                        <div className="h-2 w-2 rounded-full bg-gray-300" />
+                      )}
+                      <span className="text-sm">{format(new Date(record.date), "MMM d, EEE")}</span>
+                    </div>
+                    <span className="text-sm text-muted-foreground">{record.time}</span>
+                  </div>
+                ))}
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full mt-4"
+                onClick={() => navigate("/attendance")}
+              >
+                View Full Attendance
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>My Tasks</CardTitle>
+              <CardDescription>Upcoming and recent tasks</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {mockEmployeeTasks.map(task => (
+                <div key={task.id} className="p-2 border rounded-md hover:bg-muted/50">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">{task.title}</span>
+                    <Badge
+                      variant={
+                        task.priority === "High"
+                          ? "destructive"
+                          : task.priority === "Medium"
+                          ? "default"
+                          : "outline"
+                      }
+                    >
+                      {task.priority}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between text-sm mt-1">
+                    <span className="text-muted-foreground">Due: {format(new Date(task.dueDate), "MMM d")}</span>
+                    <Badge
+                      variant={
+                        task.status === "Completed"
+                          ? "outline"
+                          : task.status === "In Progress"
+                          ? "secondary"
+                          : "default"
+                      }
+                    >
+                      {task.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full mt-2"
+                onClick={() => navigate("/tasks")}
+              >
+                View All Tasks
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>My Leave</CardTitle>
+              <CardDescription>Leave requests and balances</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 mb-4">
+                {mockEmployeeLeave.map(leave => (
+                  <div key={leave.id} className="p-2 border rounded-md">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">{leave.type}</span>
+                      <Badge
+                        variant={
+                          leave.status === "Approved"
+                            ? "outline"
+                            : leave.status === "Pending"
+                            ? "secondary"
+                            : "destructive"
+                        }
+                      >
+                        {leave.status}
+                      </Badge>
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {format(new Date(leave.startDate), "MMM d")} - {format(new Date(leave.endDate), "MMM d")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => navigate("/leave/apply")}
+                >
+                  Apply for Leave
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => navigate("/leave/history")}
+                >
+                  Leave History
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Calendar</CardTitle>
+            <CardDescription>Your upcoming events and important dates</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={(date) => date && setDate(date)}
+              className="rounded-md border"
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Admin/HR Dashboard View
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8">
       <div>
