@@ -11,6 +11,8 @@ import ProtectedRoute from "@/components/layout/ProtectedRoute";
 
 import Index from "@/pages/Index";
 import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import PendingApproval from "@/pages/PendingApproval";
 import Dashboard from "@/pages/Dashboard";
 import Employees from "@/pages/employees/Employees";
 import Tasks from "@/pages/tasks/Tasks";
@@ -26,6 +28,7 @@ import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
 import Unauthorized from "@/pages/Unauthorized";
+import PendingApprovals from "@/pages/admin/PendingApprovals";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +44,8 @@ const App = () => (
               {/* Public routes */}
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/pending-approval" element={<PendingApproval />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
               
               {/* Protected routes - all user types */}
@@ -57,6 +62,11 @@ const App = () => (
                 <Route path="/recruitment/jobs" element={<JobPostings />} />
                 <Route path="/recruitment/applications" element={<Applications />} />
                 <Route path="/leave/requests" element={<LeaveRequests />} />
+              </Route>
+
+              {/* Admin only routes */}
+              <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+                <Route path="/admin/pending-approvals" element={<PendingApprovals />} />
               </Route>
               
               {/* Employee only routes */}

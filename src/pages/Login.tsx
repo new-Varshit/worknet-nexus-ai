@@ -79,7 +79,7 @@ const Login = () => {
                 />
               </div>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex-col gap-4">
               <Button 
                 type="submit" 
                 className="w-full bg-brand-500 hover:bg-brand-600" 
@@ -87,6 +87,20 @@ const Login = () => {
               >
                 {isSubmitting ? "Signing in..." : "Sign in"}
               </Button>
+              
+              <div className="text-center w-full">
+                <span className="text-sm text-muted-foreground">Don't have an account?</span>{" "}
+                <a 
+                  href="/register" 
+                  className="text-sm text-brand-500 hover:underline"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/register");
+                  }}
+                >
+                  Register now
+                </a>
+              </div>
             </CardFooter>
           </form>
         </Card>
@@ -94,9 +108,9 @@ const Login = () => {
         <div className="mt-6 text-center text-sm text-muted-foreground">
           <p>Demo accounts:</p>
           <div className="mt-2 space-y-1">
-            <p><strong>Admin:</strong> admin@worknet360.com / admin123</p>
-            <p><strong>HR:</strong> hr@worknet360.com / hr123</p>
-            <p><strong>Employee:</strong> employee@worknet360.com / employee123</p>
+            <p><strong>Admin:</strong> admin@ems.com / admin123</p>
+            <p><strong>HR:</strong> hr@ems.com / hr123</p>
+            <p><strong>Employee:</strong> employee@ems.com / employee123</p>
           </div>
         </div>
       </div>

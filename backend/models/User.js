@@ -21,6 +21,21 @@ const UserSchema = new mongoose.Schema({
     enum: ['admin', 'hr', 'employee'],
     default: 'employee'
   },
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female', 'other']
+  },
+  phoneNumber: {
+    type: String
+  },
+  dateOfBirth: {
+    type: Date
+  },
   department: {
     type: String,
   },
