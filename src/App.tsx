@@ -30,6 +30,11 @@ import NotFound from "@/pages/NotFound";
 import Unauthorized from "@/pages/Unauthorized";
 import PendingApprovals from "@/pages/admin/PendingApprovals";
 
+// Import HR specific pages
+import HRDashboard from "@/pages/hr/HRDashboard";
+import HRPendingApprovals from "@/pages/hr/HRPendingApprovals";
+import CompleteEmploymentInfo from "@/pages/hr/CompleteEmploymentInfo";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -50,9 +55,13 @@ const App = () => (
               
               {/* Protected routes - all user types */}
               <Route element={<ProtectedRoute />}>
-                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} />
+              </Route>
+              
+              {/* Dashboard routes - role specific */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<Dashboard />} />
               </Route>
               
               {/* Admin and HR specific routes */}
@@ -67,6 +76,12 @@ const App = () => (
               {/* Admin only routes */}
               <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
                 <Route path="/admin/pending-approvals" element={<PendingApprovals />} />
+              </Route>
+              
+              {/* HR only routes */}
+              <Route element={<ProtectedRoute allowedRoles={["hr"]} />}>
+                <Route path="/hr/pending-approvals" element={<HRPendingApprovals />} />
+                <Route path="/hr/pending-approvals/:id" element={<CompleteEmploymentInfo />} />
               </Route>
               
               {/* Employee only routes */}
