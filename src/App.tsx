@@ -30,7 +30,6 @@ import PendingApprovals from "@/pages/admin/PendingApprovals";
 
 // Import HR specific pages
 import HRDashboard from "@/pages/hr/HRDashboard";
-import HRPendingApprovals from "@/pages/hr/HRPendingApprovals";
 import CompleteEmploymentInfo from "@/pages/hr/CompleteEmploymentInfo";
 
 const queryClient = new QueryClient();
@@ -74,7 +73,7 @@ const App = () => (
                 <Route path="/admin/pending-approvals" element={<PendingApprovals />} />
               </Route>
               
-              {/* HR only routes - removed pending approvals routes */}
+              {/* HR only routes - removed pending approvals route */}
               <Route element={<ProtectedRoute allowedRoles={["hr"]} />}>
                 <Route path="/hr/dashboard" element={<HRDashboard />} />
               </Route>

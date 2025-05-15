@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -141,21 +140,10 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
             onClick={() => setOpen(false)}
           />
           
-          {/* Show Pending Approvals link to admins */}
+          {/* Show Pending Approvals link only to admins */}
           {user?.role === "admin" && (
             <MenuItem
               path="/admin/pending-approvals"
-              label="Pending Approvals"
-              icon={<CheckSquare size={20} />}
-              collapsed={collapsed}
-              onClick={() => setOpen(false)}
-            />
-          )}
-
-          {/* HR can view pending approvals that need employment info */}
-          {user?.role === "hr" && (
-            <MenuItem
-              path="/hr/pending-approvals"
               label="Pending Approvals"
               icon={<CheckSquare size={20} />}
               collapsed={collapsed}

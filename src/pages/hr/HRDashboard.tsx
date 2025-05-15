@@ -27,6 +27,11 @@ const mockJobApplications = [
   { id: 2, employee: "Lisa Wang", position: "Marketing Specialist", department: "Marketing", status: "pending" }
 ];
 
+const mockPayrollUpdates = [
+  { id: 1, employee: "James Wilson", amount: 4500, status: "unpaid", dueDate: "2025-05-30" },
+  { id: 2, employee: "Emma Rodriguez", amount: 5200, status: "unpaid", dueDate: "2025-05-30" }
+];
+
 const HRDashboard = () => {
   const navigate = useNavigate();
   const [isAddEmployeeDialogOpen, setIsAddEmployeeDialogOpen] = useState(false);
@@ -51,6 +56,10 @@ const HRDashboard = () => {
     console.log("New employee data:", employeeData);
     toast.success(`Employee ${employeeData.name} has been created successfully`);
     setIsAddEmployeeDialogOpen(false);
+  };
+
+  const handleMarkPayrollPaid = (id: number) => {
+    toast.success(`Payroll #${id} has been marked as paid`);
   };
 
   return (
@@ -94,7 +103,7 @@ const HRDashboard = () => {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Tasks</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Pending Task Assignments</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center space-x-2">
@@ -106,19 +115,60 @@ const HRDashboard = () => {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Payrolls Processed</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Pending Payroll Updates</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center space-x-2">
               <DollarSign className="h-5 w-5 text-primary" />
-              <span className="text-2xl font-bold">42</span>
+              <span className="text-2xl font-bold">8</span>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Row 2 - Insights */}
+      {/* Row 2 - Task & Leave Overview */}
       <div className="grid gap-6 md:grid-cols-2">
+        {/* My Assigned Tasks */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">My Tasks</CardTitle>
+            <CardDescription>Tasks assigned to you as an HR manager</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-md border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead className="hidden sm:table-cell">Priority</TableHead>
+                    <TableHead className="text-right">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mockTasks.map((task) => (
+                    <TableRow key={task.id}>
+                      <TableCell>{task.title}</TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <Badge variant={task.priority === "high" ? "destructive" : "outline"}>
+                          {task.priority}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Badge>{task.status}</Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="mt-4 text-right">
+              <Button variant="link" size="sm" onClick={() => navigate("/tasks")}>
+                View All Tasks
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        
         {/* Recent Leave Requests */}
         <Card>
           <CardHeader>
@@ -166,55 +216,14 @@ const HRDashboard = () => {
             </div>
           </CardContent>
         </Card>
-        
-        {/* My Tasks */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">My Tasks</CardTitle>
-            <CardDescription>Tasks assigned to you as an HR manager</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead className="hidden sm:table-cell">Priority</TableHead>
-                    <TableHead className="text-right">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockTasks.map((task) => (
-                    <TableRow key={task.id}>
-                      <TableCell>{task.title}</TableCell>
-                      <TableCell className="hidden sm:table-cell">
-                        <Badge variant={task.priority === "high" ? "destructive" : "outline"}>
-                          {task.priority}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Badge>{task.status}</Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="mt-4 text-right">
-              <Button variant="link" size="sm" onClick={() => navigate("/tasks")}>
-                View All Tasks
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
-      {/* Row 3 - Control & Management */}
+      {/* Row 3 - Employee Insights */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Job Applications */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Job Applications</CardTitle>
+            <CardTitle className="text-xl">Internal Job Applications</CardTitle>
             <CardDescription>Recent internal job applications requiring your review</CardDescription>
           </CardHeader>
           <CardContent>
@@ -257,36 +266,41 @@ const HRDashboard = () => {
           </CardContent>
         </Card>
         
-        {/* Quick Actions */}
+        {/* Quick Payroll Snapshot */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Quick Actions</CardTitle>
-            <CardDescription>Common HR tasks and actions</CardDescription>
+            <CardTitle className="text-xl">Payroll Snapshot</CardTitle>
+            <CardDescription>Upcoming payroll status for employees</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Button className="flex flex-col h-auto py-4" variant="outline" 
-                onClick={() => navigate("/employees")}>
-                <Users className="h-6 w-6 mb-2" />
-                <span>Manage Employees</span>
-              </Button>
-              
-              <Button className="flex flex-col h-auto py-4" variant="outline"
-                onClick={() => setIsAddEmployeeDialogOpen(true)}>
-                <UserPlus className="h-6 w-6 mb-2" />
-                <span>Add Employee</span>
-              </Button>
-              
-              <Button className="flex flex-col h-auto py-4" variant="outline"
-                onClick={() => navigate("/payroll")}>
-                <DollarSign className="h-6 w-6 mb-2" />
-                <span>Process Payroll</span>
-              </Button>
-              
-              <Button className="flex flex-col h-auto py-4" variant="outline"
-                onClick={() => navigate("/tasks")}>
-                <CheckCircle className="h-6 w-6 mb-2" />
-                <span>Assign Tasks</span>
+          <CardContent>
+            <div className="rounded-md border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Employee</TableHead>
+                    <TableHead className="hidden sm:table-cell">Amount</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mockPayrollUpdates.map((payroll) => (
+                    <TableRow key={payroll.id}>
+                      <TableCell>{payroll.employee}</TableCell>
+                      <TableCell className="hidden sm:table-cell">${payroll.amount}</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="outline" size="sm" className="h-8"
+                          onClick={() => handleMarkPayrollPaid(payroll.id)}>
+                          Mark as Paid
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="mt-4 text-right">
+              <Button variant="link" size="sm" onClick={() => navigate("/payroll")}>
+                View Full Payroll
               </Button>
             </div>
           </CardContent>
