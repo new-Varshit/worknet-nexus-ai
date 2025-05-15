@@ -22,18 +22,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (userData: RegisterData) => Promise<void>;
   isAuthenticated: boolean;
-}
-
-export interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-  gender: string;
-  phoneNumber: string;
-  dateOfBirth: string;
-  profileImage?: File;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -136,13 +125,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
     
     if (foundUser) {
-      // Check if user is approved
-      if (foundUser.status === 'pending') {
-        setIsLoading(false);
-        toast.error("Your account is pending approval");
-        throw new Error('Account pending approval');
-      }
-      
       // Remove password before storing
       const { password: _, ...userWithoutPassword } = foundUser;
       setUser(userWithoutPassword);
@@ -154,28 +136,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     
     setIsLoading(false);
-  };
-
-  const register = async (userData: RegisterData) => {
-    setIsLoading(true);
-    
-    // Simulate network request
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Check if user already exists
-    const existingUser = MOCK_USERS.find(u => u.email === userData.email);
-    if (existingUser) {
-      setIsLoading(false);
-      toast.error("A user with this email already exists");
-      throw new Error('User already exists');
-    }
-
-    // In a real app, you would send this data to the backend API
-    // and handle the response accordingly
-    console.log('User registered successfully', userData);
-    
-    setIsLoading(false);
-    return;
   };
 
   const logout = () => {
@@ -190,7 +150,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isLoading, 
       login, 
       logout,
-      register, 
       isAuthenticated: !!user 
     }}>
       {children}

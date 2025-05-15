@@ -1,384 +1,304 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Clock, CheckSquare, DollarSign, CalendarRange, ListTodo, Briefcase } from "lucide-react";
-import { format } from "date-fns";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import StatCard from "@/components/dashboard/StatCard";
+import { Dialog } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { User, Users, FileText, Calendar, DollarSign, UserPlus, CheckCircle } from "lucide-react";
+import EmployeeDialog from "@/pages/employees/EmployeeDialog";
 
-// Mock data for HR dashboard
-const mockEmployeeCount = 42;
-const mockPendingLeaves = 8;
-const mockAssignedTasks = 23;
-const mockPaidPayrolls = 35;
-
-const mockRecentLeaves = [
-  {
-    id: 1,
-    employee: "Alice Johnson",
-    type: "Sick",
-    startDate: "2025-05-20",
-    endDate: "2025-05-22",
-    status: "Pending"
-  },
-  {
-    id: 2,
-    employee: "Bob Smith",
-    type: "Vacation",
-    startDate: "2025-05-25",
-    endDate: "2025-05-30",
-    status: "Pending"
-  },
-  {
-    id: 3,
-    employee: "Charlie Davis",
-    type: "Personal",
-    startDate: "2025-05-18",
-    endDate: "2025-05-19",
-    status: "Pending"
-  },
-  {
-    id: 4,
-    employee: "Diana Parker",
-    type: "Bereavement",
-    startDate: "2025-05-15",
-    endDate: "2025-05-18",
-    status: "Pending"
-  },
-  {
-    id: 5,
-    employee: "Evan Thompson",
-    type: "Sick",
-    startDate: "2025-05-16",
-    endDate: "2025-05-17",
-    status: "Pending"
-  }
+// Mock Data for Dashboard
+const mockLeaveRequests = [
+  { id: 1, employee: "John Doe", type: "Sick Leave", days: 2, from: "2025-05-20", status: "pending" },
+  { id: 2, employee: "Emily Brown", type: "Vacation", days: 5, from: "2025-06-10", status: "pending" },
+  { id: 3, employee: "Sarah Chen", type: "Personal Leave", days: 1, from: "2025-05-18", status: "pending" }
 ];
 
-const mockPersonalTasks = [
-  {
-    id: 1,
-    title: "Review new hire documentation",
-    priority: "High",
-    dueDate: "2025-05-20",
-    status: "In Progress"
-  },
-  {
-    id: 2,
-    title: "Update employee handbook",
-    priority: "Medium",
-    dueDate: "2025-05-25",
-    status: "To Do"
-  },
-  {
-    id: 3,
-    title: "Prepare training schedule",
-    priority: "Low",
-    dueDate: "2025-05-30",
-    status: "To Do"
-  }
-];
-
-const mockPendingApprovals = [
-  {
-    id: 1,
-    name: "Sarah Williams",
-    email: "sarah.w@example.com",
-    appliedDate: "2025-05-10",
-    employmentInfoComplete: false
-  },
-  {
-    id: 2,
-    name: "Michael Brown",
-    email: "michael.b@example.com",
-    appliedDate: "2025-05-11",
-    employmentInfoComplete: false
-  },
-  {
-    id: 3,
-    name: "Jessica Lee",
-    email: "jessica.l@example.com",
-    appliedDate: "2025-05-12",
-    employmentInfoComplete: true
-  }
+const mockTasks = [
+  { id: 1, title: "Review new applicants", priority: "high", deadline: "2025-05-17", status: "in progress" },
+  { id: 2, title: "Prepare monthly report", priority: "medium", deadline: "2025-05-20", status: "not started" }
 ];
 
 const mockJobApplications = [
-  {
-    id: 1,
-    employee: "Ryan Moore",
-    position: "Senior Developer",
-    appliedDate: "2025-05-08",
-    status: "Pending"
-  },
-  {
-    id: 2,
-    employee: "Olivia Garcia",
-    position: "Project Manager",
-    appliedDate: "2025-05-09",
-    status: "Pending"
-  }
+  { id: 1, employee: "Michael Roberts", position: "Senior Developer", department: "Engineering", status: "pending" },
+  { id: 2, employee: "Lisa Wang", position: "Marketing Specialist", department: "Marketing", status: "pending" }
 ];
 
 const HRDashboard = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [isAddEmployeeDialogOpen, setIsAddEmployeeDialogOpen] = useState(false);
 
-  // Function to get initials from name
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
+  const handleApproveLeave = (id: number) => {
+    toast.success(`Leave request #${id} has been approved`);
+  };
+  
+  const handleRejectLeave = (id: number) => {
+    toast.success(`Leave request #${id} has been rejected`);
+  };
+  
+  const handleApproveApplication = (id: number) => {
+    toast.success(`Job application #${id} has been approved`);
+  };
+  
+  const handleRejectApplication = (id: number) => {
+    toast.success(`Job application #${id} has been rejected`);
+  };
+  
+  const handleAddEmployee = (employeeData: any) => {
+    console.log("New employee data:", employeeData);
+    toast.success(`Employee ${employeeData.name} has been created successfully`);
+    setIsAddEmployeeDialogOpen(false);
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">HR Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome back, {user?.name || "HR Manager"}
-        </p>
+    <div className="container mx-auto py-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">HR Dashboard</h1>
+          <p className="text-muted-foreground">Welcome to your HR dashboard</p>
+        </div>
+        <Button className="btn-gradient" onClick={() => setIsAddEmployeeDialogOpen(true)}>
+          <UserPlus className="mr-2 h-4 w-4" />
+          Add New Employee
+        </Button>
       </div>
 
-      {/* Row 1: Top Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatCard
-          title="Total Employees"
-          value={mockEmployeeCount.toString()}
-          description="Employees under management"
-          icon={<Users className="h-4 w-4" />}
-        />
-        <StatCard
-          title="Pending Leaves"
-          value={mockPendingLeaves.toString()}
-          description="Leave requests awaiting review"
-          icon={<CalendarRange className="h-4 w-4" />}
-        />
-        <StatCard
-          title="Active Tasks"
-          value={mockAssignedTasks.toString()}
-          description="Tasks assigned to employees"
-          icon={<ListTodo className="h-4 w-4" />}
-        />
-        <StatCard
-          title="Payrolls Paid"
-          value={mockPaidPayrolls.toString()}
-          description="Payrolls processed this month"
-          icon={<DollarSign className="h-4 w-4" />}
-        />
+      {/* Row 1 - Summary Cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Employees</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center space-x-2">
+              <Users className="h-5 w-5 text-primary" />
+              <span className="text-2xl font-bold">48</span>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Pending Leave Requests</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center space-x-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              <span className="text-2xl font-bold">5</span>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Active Tasks</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center space-x-2">
+              <FileText className="h-5 w-5 text-primary" />
+              <span className="text-2xl font-bold">12</span>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Payrolls Processed</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center space-x-2">
+              <DollarSign className="h-5 w-5 text-primary" />
+              <span className="text-2xl font-bold">42</span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Row 2: Insights Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Row 2 - Insights */}
+      <div className="grid gap-6 md:grid-cols-2">
         {/* Recent Leave Requests */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="space-y-1">
-              <CardTitle>Recent Leave Requests</CardTitle>
-              <CardDescription>
-                Latest requests awaiting approval
-              </CardDescription>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/leave/requests")}
-            >
-              View All
-            </Button>
+          <CardHeader>
+            <CardTitle className="text-xl">Recent Leave Requests</CardTitle>
+            <CardDescription>Recent employee leave requests requiring your approval</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {mockRecentLeaves.map((leave) => (
-                <div key={leave.id} className="flex justify-between items-start border-b pb-3 last:border-0 last:pb-0">
-                  <div>
-                    <p className="font-medium">{leave.employee}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {leave.type} leave: {format(new Date(leave.startDate), "MMM d")} - {format(new Date(leave.endDate), "MMM d")}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="h-8 text-green-600 hover:text-green-700 hover:bg-green-50">
-                      Approve
-                    </Button>
-                    <Button size="sm" variant="outline" className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50">
-                      Reject
-                    </Button>
-                  </div>
-                </div>
-              ))}
+            <div className="rounded-md border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Employee</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead className="hidden sm:table-cell">Days</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mockLeaveRequests.map((request) => (
+                    <TableRow key={request.id}>
+                      <TableCell>{request.employee}</TableCell>
+                      <TableCell>{request.type}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{request.days}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="outline" size="sm" className="h-8" 
+                            onClick={() => handleApproveLeave(request.id)}>
+                            Approve
+                          </Button>
+                          <Button variant="outline" size="sm" className="h-8"
+                            onClick={() => handleRejectLeave(request.id)}>
+                            Reject
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="mt-4 text-right">
+              <Button variant="link" size="sm" onClick={() => navigate("/leave/requests")}>
+                View All Leave Requests
+              </Button>
             </div>
           </CardContent>
         </Card>
-
-        {/* My Personal Tasks */}
+        
+        {/* My Tasks */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="space-y-1">
-              <CardTitle>My Tasks</CardTitle>
-              <CardDescription>
-                Tasks assigned to you
-              </CardDescription>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/tasks")}
-            >
-              View All
-            </Button>
+          <CardHeader>
+            <CardTitle className="text-xl">My Tasks</CardTitle>
+            <CardDescription>Tasks assigned to you as an HR manager</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {mockPersonalTasks.map((task) => (
-                <div key={task.id} className="border rounded-md p-3">
-                  <div className="flex justify-between items-center mb-1">
-                    <h3 className="font-medium">{task.title}</h3>
-                    <Badge
-                      variant={
-                        task.priority === "High"
-                          ? "destructive"
-                          : task.priority === "Medium"
-                          ? "default"
-                          : "outline"
-                      }
-                    >
-                      {task.priority}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Due: {format(new Date(task.dueDate), "MMM d")}</span>
-                    <Badge
-                      variant={
-                        task.status === "Completed"
-                          ? "outline"
-                          : task.status === "In Progress"
-                          ? "secondary"
-                          : "default"
-                      }
-                    >
-                      {task.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
+            <div className="rounded-md border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead className="hidden sm:table-cell">Priority</TableHead>
+                    <TableHead className="text-right">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mockTasks.map((task) => (
+                    <TableRow key={task.id}>
+                      <TableCell>{task.title}</TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <Badge variant={task.priority === "high" ? "destructive" : "outline"}>
+                          {task.priority}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Badge>{task.status}</Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="mt-4 text-right">
+              <Button variant="link" size="sm" onClick={() => navigate("/tasks")}>
+                View All Tasks
+              </Button>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Row 3: Control & Management */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Pending Approvals */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="space-y-1">
-              <CardTitle>Pending Approvals</CardTitle>
-              <CardDescription>
-                Users waiting for employment info and approval
-              </CardDescription>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/hr/pending-approvals")}
-            >
-              View All
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {mockPendingApprovals.map((user) => (
-                <div key={user.id} className="flex justify-between items-center border-b pb-3 last:border-0 last:pb-0">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
-                    </div>
-                  </div>
-                  <div>
-                    {!user.employmentInfoComplete ? (
-                      <Button size="sm" onClick={() => navigate(`/hr/pending-approvals/${user.id}`)}>
-                        Complete Info
-                      </Button>
-                    ) : (
-                      <Button size="sm" variant="outline" className="text-green-600 hover:text-green-700 hover:bg-green-50">
-                        Approve
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
+      {/* Row 3 - Control & Management */}
+      <div className="grid gap-6 md:grid-cols-2">
         {/* Job Applications */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="space-y-1">
-              <CardTitle>Internal Job Applications</CardTitle>
-              <CardDescription>
-                Applications pending your review
-              </CardDescription>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/recruitment/applications")}
-            >
-              View All
-            </Button>
+          <CardHeader>
+            <CardTitle className="text-xl">Job Applications</CardTitle>
+            <CardDescription>Recent internal job applications requiring your review</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {mockJobApplications.map((application) => (
-                <div key={application.id} className="flex justify-between items-start border-b pb-3 last:border-0 last:pb-0">
-                  <div>
-                    <p className="font-medium">{application.employee}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Position: {application.position}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Applied: {format(new Date(application.appliedDate), "MMM d, yyyy")}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="h-8 text-green-600 hover:text-green-700 hover:bg-green-50">
-                      Accept
-                    </Button>
-                    <Button size="sm" variant="outline" className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50">
-                      Reject
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              <div className="pt-2">
-                <Button 
-                  className="w-full" 
-                  variant="outline"
-                  onClick={() => navigate("/tasks/assign")}
-                >
-                  <ListTodo className="mr-2 h-4 w-4" />
-                  Assign New Task
-                </Button>
-              </div>
+            <div className="rounded-md border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Employee</TableHead>
+                    <TableHead className="hidden sm:table-cell">Position</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mockJobApplications.map((application) => (
+                    <TableRow key={application.id}>
+                      <TableCell>{application.employee}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{application.position}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="outline" size="sm" className="h-8"
+                            onClick={() => handleApproveApplication(application.id)}>
+                            Approve
+                          </Button>
+                          <Button variant="outline" size="sm" className="h-8"
+                            onClick={() => handleRejectApplication(application.id)}>
+                            Reject
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="mt-4 text-right">
+              <Button variant="link" size="sm" onClick={() => navigate("/recruitment/applications")}>
+                View All Applications
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">Quick Actions</CardTitle>
+            <CardDescription>Common HR tasks and actions</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Button className="flex flex-col h-auto py-4" variant="outline" 
+                onClick={() => navigate("/employees")}>
+                <Users className="h-6 w-6 mb-2" />
+                <span>Manage Employees</span>
+              </Button>
+              
+              <Button className="flex flex-col h-auto py-4" variant="outline"
+                onClick={() => setIsAddEmployeeDialogOpen(true)}>
+                <UserPlus className="h-6 w-6 mb-2" />
+                <span>Add Employee</span>
+              </Button>
+              
+              <Button className="flex flex-col h-auto py-4" variant="outline"
+                onClick={() => navigate("/payroll")}>
+                <DollarSign className="h-6 w-6 mb-2" />
+                <span>Process Payroll</span>
+              </Button>
+              
+              <Button className="flex flex-col h-auto py-4" variant="outline"
+                onClick={() => navigate("/tasks")}>
+                <CheckCircle className="h-6 w-6 mb-2" />
+                <span>Assign Tasks</span>
+              </Button>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Employee Creation Dialog */}
+      <EmployeeDialog
+        open={isAddEmployeeDialogOpen}
+        onOpenChange={setIsAddEmployeeDialogOpen}
+        onSave={handleAddEmployee}
+      />
     </div>
   );
 };

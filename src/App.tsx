@@ -11,8 +11,6 @@ import ProtectedRoute from "@/components/layout/ProtectedRoute";
 
 import Index from "@/pages/Index";
 import Login from "@/pages/Login";
-import Register from "@/pages/Register";
-import PendingApproval from "@/pages/PendingApproval";
 import Dashboard from "@/pages/Dashboard";
 import Employees from "@/pages/employees/Employees";
 import Tasks from "@/pages/tasks/Tasks";
@@ -49,8 +47,6 @@ const App = () => (
               {/* Public routes */}
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/pending-approval" element={<PendingApproval />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
               
               {/* Protected routes - all user types */}
@@ -78,10 +74,9 @@ const App = () => (
                 <Route path="/admin/pending-approvals" element={<PendingApprovals />} />
               </Route>
               
-              {/* HR only routes */}
+              {/* HR only routes - removed pending approvals routes */}
               <Route element={<ProtectedRoute allowedRoles={["hr"]} />}>
-                <Route path="/hr/pending-approvals" element={<HRPendingApprovals />} />
-                <Route path="/hr/pending-approvals/:id" element={<CompleteEmploymentInfo />} />
+                <Route path="/hr/dashboard" element={<HRDashboard />} />
               </Route>
               
               {/* Employee only routes */}
