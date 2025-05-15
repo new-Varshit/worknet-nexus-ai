@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -25,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -92,7 +91,7 @@ const MenuGroup: React.FC<MenuGroupProps> = ({ title, children, collapsed }) => 
 const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const location = useLocation();
   const [open, setOpen] = useState(false);
 
