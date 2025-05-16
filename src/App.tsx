@@ -1,11 +1,13 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { ThemeProvider } from "@/contexts/ThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 
 import Index from "@/pages/Index";
@@ -36,6 +38,19 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 
 const queryClient = new QueryClient();
 
+// Helper component to redirect based on user role
+const DashboardRouter = () => {
+  const { user } = useAuth();
+  
+  if (user?.role === "admin") {
+    return <Navigate to="/admin/dashboard" replace />;
+  } else if (user?.role === "hr") {
+    return <Navigate to="/hr/dashboard" replace />;
+  } else {
+    return <Dashboard />; // Default dashboard for employees
+  }
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="light">
@@ -58,8 +73,8 @@ const App = () => (
               
               {/* Dashboard routes - role specific */}
               <Route element={<ProtectedRoute />}>
-                {/* Admin gets directed to admin dashboard */}
-                <Route path="/dashboard" element={<Dashboard />} />
+                {/* This route will redirect admins to their dashboard */}
+                <Route path="/dashboard" element={<DashboardRouter />} />
               </Route>
               
               {/* Admin and HR specific routes */}
@@ -71,7 +86,7 @@ const App = () => (
                 <Route path="/leave/requests" element={<LeaveRequests />} />
               </Route>
 
-              {/* Admin only routes - removed pending-approvals */}
+              {/* Admin only routes */}
               <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
               </Route>

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -131,14 +132,27 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
 
       <div className="flex-1 overflow-auto pt-3">
         <MenuGroup title="Main" collapsed={collapsed}>
-          <MenuItem
-            path="/dashboard"
-            label="Dashboard"
-            icon={<LayoutDashboard size={20} />}
-            collapsed={collapsed}
-            onClick={() => setOpen(false)}
-          />
-          
+          {/* Standard Dashboard for non-admin users */}
+          {user?.role !== "admin" && (
+            <MenuItem
+              path="/dashboard"
+              label="Dashboard"
+              icon={<LayoutDashboard size={20} />}
+              collapsed={collapsed}
+              onClick={() => setOpen(false)}
+            />
+          )}
+
+          {/* Admin Dashboard for admin users */}
+          {user?.role === "admin" && (
+            <MenuItem
+              path="/admin/dashboard"
+              label="Admin Dashboard"
+              icon={<LayoutDashboard size={20} />}
+              collapsed={collapsed}
+              onClick={() => setOpen(false)}
+            />
+          )}
 
           {(user?.role === "admin" || user?.role === "hr") && (
             <MenuItem
