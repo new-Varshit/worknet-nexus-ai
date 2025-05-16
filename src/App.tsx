@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -42,12 +41,13 @@ const queryClient = new QueryClient();
 const DashboardRouter = () => {
   const { user } = useAuth();
   
+  // Redirect different user roles to their appropriate dashboards
   if (user?.role === "admin") {
     return <Navigate to="/admin/dashboard" replace />;
   } else if (user?.role === "hr") {
     return <Navigate to="/hr/dashboard" replace />;
   } else {
-    return <Dashboard />; // Default dashboard for employees
+    return <Navigate to="/dashboard/employee" replace />;  // Redirect regular employees
   }
 };
 
@@ -71,10 +71,10 @@ const App = () => (
                 <Route path="/settings" element={<Settings />} />
               </Route>
               
-              {/* Dashboard routes - role specific */}
+              {/* Role-specific dashboard routes */}
               <Route element={<ProtectedRoute />}>
-                {/* This route will redirect admins to their dashboard */}
                 <Route path="/dashboard" element={<DashboardRouter />} />
+                <Route path="/dashboard/employee" element={<Dashboard />} />
               </Route>
               
               {/* Admin and HR specific routes */}
@@ -89,11 +89,13 @@ const App = () => (
               {/* Admin only routes */}
               <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/pending-approvals" element={<PendingApprovals />} />
               </Route>
               
               {/* HR only routes */}
               <Route element={<ProtectedRoute allowedRoles={["hr"]} />}>
                 <Route path="/hr/dashboard" element={<HRDashboard />} />
+                <Route path="/hr/complete-employment-info" element={<CompleteEmploymentInfo />} />
               </Route>
               
               {/* Employee only routes */}
