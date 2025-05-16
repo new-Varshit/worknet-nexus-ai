@@ -16,7 +16,6 @@ import {
   X,
   UserCircle,
   Bell,
-  CheckSquare,
   User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -140,16 +139,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
             onClick={() => setOpen(false)}
           />
           
-          {/* Show Pending Approvals link only to admins */}
-          {user?.role === "admin" && (
-            <MenuItem
-              path="/admin/pending-approvals"
-              label="Pending Approvals"
-              icon={<CheckSquare size={20} />}
-              collapsed={collapsed}
-              onClick={() => setOpen(false)}
-            />
-          )}
 
           {(user?.role === "admin" || user?.role === "hr") && (
             <MenuItem

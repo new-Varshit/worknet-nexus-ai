@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -59,6 +58,7 @@ const App = () => (
               
               {/* Dashboard routes - role specific */}
               <Route element={<ProtectedRoute />}>
+                {/* Admin gets directed to admin dashboard */}
                 <Route path="/dashboard" element={<Dashboard />} />
               </Route>
               
@@ -71,13 +71,12 @@ const App = () => (
                 <Route path="/leave/requests" element={<LeaveRequests />} />
               </Route>
 
-              {/* Admin only routes */}
+              {/* Admin only routes - removed pending-approvals */}
               <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-                <Route path="/admin/pending-approvals" element={<PendingApprovals />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
               </Route>
               
-              {/* HR only routes - removed pending approvals route */}
+              {/* HR only routes */}
               <Route element={<ProtectedRoute allowedRoles={["hr"]} />}>
                 <Route path="/hr/dashboard" element={<HRDashboard />} />
               </Route>
