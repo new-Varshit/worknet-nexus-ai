@@ -131,8 +131,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
 
       <div className="flex-1 overflow-auto pt-3">
         <MenuGroup title="Main" collapsed={collapsed}>
-          {/* Regular dashboard for non-admin users */}
-          {user?.role !== "admin" && (
+          {/* Regular dashboard for regular employees */}
+          {user?.role === "employee" && (
             <MenuItem
               path="/dashboard"
               label="Dashboard"
