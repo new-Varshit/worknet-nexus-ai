@@ -11,6 +11,7 @@ const recruitmentRoutes = require('./routes/recruitment');
 const payrollRoutes = require('./routes/payroll');
 const authRoutes = require('./routes/auth');
 const hrRoutes = require('./routes/hr');
+const adminRoutes = require('./routes/admin');
 
 // Load environment variables
 dotenv.config();
@@ -37,6 +38,7 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/recruitment', recruitmentRoutes);
 app.use('/api/payroll', payrollRoutes);
 app.use('/api/hr', hrRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Root route
 app.get('/', (req, res) => {
