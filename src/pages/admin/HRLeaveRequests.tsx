@@ -67,7 +67,7 @@ const HRLeaveRequests = () => {
                       <TableCell>{request.days}</TableCell>
                       <TableCell>
                         <Badge variant={
-                          request.status === "Approved" ? "success" :
+                          request.status === "Approved" ? "default" :
                           request.status === "Rejected" ? "destructive" : "outline"
                         }>
                           {request.status}

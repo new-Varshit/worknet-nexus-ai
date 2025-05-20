@@ -36,7 +36,7 @@ import CompleteEmploymentInfo from "@/pages/hr/CompleteEmploymentInfo";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import HRLeaveRequests from "@/pages/admin/HRLeaveRequests";
 import PayrollOverview from "@/pages/admin/PayrollOverview";
-import UserManagement from "@/pages/admin/UserManagement";
+import UserManagement from "@/components/admin/UserManagement";
 import JobOutcomes from "@/pages/admin/JobOutcomes";
 import EmployeeAnalytics from "@/pages/admin/EmployeeAnalytics";
 
