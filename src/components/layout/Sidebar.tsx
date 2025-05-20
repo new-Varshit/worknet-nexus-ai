@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -17,6 +18,8 @@ import {
   UserCircle,
   Bell,
   User,
+  FileText,
+  BarChart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -131,10 +134,10 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
 
       <div className="flex-1 overflow-auto pt-3">
         <MenuGroup title="Main" collapsed={collapsed}>
-          {/* Regular dashboard for regular employees */}
+          {/* Employee Dashboard - only for employees */}
           {user?.role === "employee" && (
             <MenuItem
-              path="/dashboard"
+              path="/dashboard/employee"
               label="Dashboard"
               icon={<LayoutDashboard size={20} />}
               collapsed={collapsed}
@@ -142,18 +145,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
             />
           )}
 
-          {/* Admin Dashboard link specifically for admin users */}
-          {user?.role === "admin" && (
-            <MenuItem
-              path="/admin/dashboard"
-              label="Admin Dashboard"
-              icon={<LayoutDashboard size={20} />}
-              collapsed={collapsed}
-              onClick={() => setOpen(false)}
-            />
-          )}
-
-          {/* HR Dashboard link specifically for HR users */}
+          {/* HR Dashboard - only for HR */}
           {user?.role === "hr" && (
             <MenuItem
               path="/hr/dashboard"
@@ -164,6 +156,18 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
             />
           )}
 
+          {/* Admin Dashboard - only for admins */}
+          {user?.role === "admin" && (
+            <MenuItem
+              path="/admin/dashboard"
+              label="Admin Dashboard"
+              icon={<LayoutDashboard size={20} />}
+              collapsed={collapsed}
+              onClick={() => setOpen(false)}
+            />
+          )}
+
+          {/* Employees - visible to admin and HR */}
           {(user?.role === "admin" || user?.role === "hr") && (
             <MenuItem
               path="/employees"
@@ -173,9 +177,21 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
               onClick={() => setOpen(false)}
             />
           )}
+
+          {/* Employee analytics - admin only */}
+          {user?.role === "admin" && (
+            <MenuItem
+              path="/admin/analytics"
+              label="Analytics"
+              icon={<BarChart size={20} />}
+              collapsed={collapsed}
+              onClick={() => setOpen(false)}
+            />
+          )}
         </MenuGroup>
 
         <MenuGroup title="Work Management" collapsed={collapsed}>
+          {/* Tasks - visible to all roles */}
           <MenuItem
             path="/tasks"
             label="Tasks"
@@ -183,6 +199,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
             collapsed={collapsed}
             onClick={() => setOpen(false)}
           />
+          
+          {/* Attendance - visible to all roles */}
           <MenuItem
             path="/attendance"
             label="Attendance"
@@ -193,6 +211,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
         </MenuGroup>
 
         <MenuGroup title="Leave Management" collapsed={collapsed}>
+          {/* Apply Leave - employee only */}
           {user?.role === "employee" && (
             <MenuItem
               path="/leave/apply"
@@ -202,7 +221,20 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
               onClick={() => setOpen(false)}
             />
           )}
-          {(user?.role === "admin" || user?.role === "hr") && (
+          
+          {/* HR Leave Requests - for admin only */}
+          {user?.role === "admin" && (
+            <MenuItem
+              path="/admin/hr-leave-requests"
+              label="HR Leave Requests"
+              icon={<CalendarRange size={20} />}
+              collapsed={collapsed}
+              onClick={() => setOpen(false)}
+            />
+          )}
+          
+          {/* Employee Leave Requests - for HR only */}
+          {user?.role === "hr" && (
             <MenuItem
               path="/leave/requests"
               label="Leave Requests"
@@ -211,6 +243,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
               onClick={() => setOpen(false)}
             />
           )}
+          
+          {/* Leave History - visible to all */}
           <MenuItem
             path="/leave/history"
             label="Leave History"
@@ -221,16 +255,30 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
         </MenuGroup>
 
         <MenuGroup title="Finance & Recruitment" collapsed={collapsed}>
-          {(user?.role === "admin" || user?.role === "hr") && (
+          {/* Payroll - HR only can manage */}
+          {user?.role === "hr" && (
             <MenuItem
               path="/payroll"
-              label="Payroll"
+              label="Payroll Management"
               icon={<DollarSign size={20} />}
               collapsed={collapsed}
               onClick={() => setOpen(false)}
             />
           )}
-          {(user?.role === "admin" || user?.role === "hr") && (
+          
+          {/* Payroll View - Admin only (read-only) */}
+          {user?.role === "admin" && (
+            <MenuItem
+              path="/admin/payroll-overview"
+              label="Payroll Overview"
+              icon={<FileText size={20} />}
+              collapsed={collapsed}
+              onClick={() => setOpen(false)}
+            />
+          )}
+          
+          {/* Job Postings - HR only */}
+          {user?.role === "hr" && (
             <MenuItem
               path="/recruitment/jobs"
               label="Job Postings"
@@ -239,7 +287,9 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
               onClick={() => setOpen(false)}
             />
           )}
-          {(user?.role === "admin" || user?.role === "hr") && (
+          
+          {/* Applications - HR only (with resume parsing) */}
+          {user?.role === "hr" && (
             <MenuItem
               path="/recruitment/applications"
               label="Applications"
@@ -248,6 +298,19 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
               onClick={() => setOpen(false)}
             />
           )}
+          
+          {/* Job Outcomes - Admin only (read-only) */}
+          {user?.role === "admin" && (
+            <MenuItem
+              path="/admin/job-outcomes"
+              label="Job Outcomes"
+              icon={<Briefcase size={20} />}
+              collapsed={collapsed}
+              onClick={() => setOpen(false)}
+            />
+          )}
+          
+          {/* Internal Jobs - visible to all */}
           <MenuItem
             path="/recruitment/internal"
             label="Internal Jobs"
@@ -256,6 +319,19 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
             onClick={() => setOpen(false)}
           />
         </MenuGroup>
+
+        {/* User Management - Admin only */}
+        {user?.role === "admin" && (
+          <MenuGroup title="System Management" collapsed={collapsed}>
+            <MenuItem
+              path="/admin/user-management"
+              label="User Management"
+              icon={<UserPlus size={20} />}
+              collapsed={collapsed}
+              onClick={() => setOpen(false)}
+            />
+          </MenuGroup>
+        )}
       </div>
 
       <div className="border-t p-3">

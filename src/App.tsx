@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -26,7 +27,6 @@ import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
 import Unauthorized from "@/pages/Unauthorized";
-import PendingApprovals from "@/pages/admin/PendingApprovals";
 
 // Import HR specific pages
 import HRDashboard from "@/pages/hr/HRDashboard";
@@ -34,6 +34,11 @@ import CompleteEmploymentInfo from "@/pages/hr/CompleteEmploymentInfo";
 
 // Import Admin Dashboard
 import AdminDashboard from "@/pages/admin/AdminDashboard";
+import HRLeaveRequests from "@/pages/admin/HRLeaveRequests";
+import PayrollOverview from "@/pages/admin/PayrollOverview";
+import UserManagement from "@/pages/admin/UserManagement";
+import JobOutcomes from "@/pages/admin/JobOutcomes";
+import EmployeeAnalytics from "@/pages/admin/EmployeeAnalytics";
 
 const queryClient = new QueryClient();
 
@@ -71,36 +76,40 @@ const App = () => (
                 <Route path="/settings" element={<Settings />} />
               </Route>
               
-              {/* Role-specific dashboard routes */}
+              {/* Dashboard router - redirects based on role */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<DashboardRouter />} />
+              </Route>
+
+              {/* Employee specific routes */}
+              <Route element={<ProtectedRoute allowedRoles={["employee"]} />}>
                 <Route path="/dashboard/employee" element={<Dashboard />} />
+                <Route path="/leave/apply" element={<LeaveApply />} />
               </Route>
               
-              {/* Admin and HR specific routes */}
-              <Route element={<ProtectedRoute allowedRoles={["admin", "hr"]} />}>
-                <Route path="/employees" element={<Employees />} />
+              {/* HR specific routes */}
+              <Route element={<ProtectedRoute allowedRoles={["hr"]} />}>
+                <Route path="/hr/dashboard" element={<HRDashboard />} />
+                <Route path="/hr/complete-employment-info" element={<CompleteEmploymentInfo />} />
+                <Route path="/leave/requests" element={<LeaveRequests />} />
                 <Route path="/payroll" element={<Payroll />} />
                 <Route path="/recruitment/jobs" element={<JobPostings />} />
                 <Route path="/recruitment/applications" element={<Applications />} />
-                <Route path="/leave/requests" element={<LeaveRequests />} />
               </Route>
 
               {/* Admin only routes */}
               <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/pending-approvals" element={<PendingApprovals />} />
+                <Route path="/admin/hr-leave-requests" element={<HRLeaveRequests />} />
+                <Route path="/admin/payroll-overview" element={<PayrollOverview />} />
+                <Route path="/admin/user-management" element={<UserManagement />} />
+                <Route path="/admin/job-outcomes" element={<JobOutcomes />} />
+                <Route path="/admin/analytics" element={<EmployeeAnalytics />} />
               </Route>
               
-              {/* HR only routes */}
-              <Route element={<ProtectedRoute allowedRoles={["hr"]} />}>
-                <Route path="/hr/dashboard" element={<HRDashboard />} />
-                <Route path="/hr/complete-employment-info" element={<CompleteEmploymentInfo />} />
-              </Route>
-              
-              {/* Employee only routes */}
-              <Route element={<ProtectedRoute allowedRoles={["employee"]} />}>
-                <Route path="/leave/apply" element={<LeaveApply />} />
+              {/* Admin and HR shared routes */}
+              <Route element={<ProtectedRoute allowedRoles={["admin", "hr"]} />}>
+                <Route path="/employees" element={<Employees />} />
               </Route>
 
               {/* All user routes */}
