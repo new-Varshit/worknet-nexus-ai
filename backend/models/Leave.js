@@ -39,6 +39,13 @@ const LeaveSchema = new mongoose.Schema({
   },
   comments: {
     type: String
+  },
+  submittedDate: {
+    type: Date,
+    default: Date.now
+  },
+  processedDate: {
+    type: Date
   }
 }, {
   timestamps: true

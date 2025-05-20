@@ -14,7 +14,8 @@ const router = express.Router();
 // @access  Private (Admin only)
 router.get('/users', auth, authorize('admin'), async (req, res) => {
   try {
-    const users = await User.find().select('-password');
+    const users = await User.find().select('-password')
+      .sort({ role: 1, name: 1 });
     res.json(users);
   } catch (error) {
     console.error(error);
@@ -120,7 +121,7 @@ router.get('/hr-leave-requests', auth, authorize('admin'), async (req, res) => {
     })
     .populate('employee', 'name email department position')
     .populate('approvedBy', 'name email')
-    .sort({ createdAt: -1 });
+    .sort({ submittedDate: -1 });
     
     res.json(leaveRequests);
   } catch (error) {
@@ -155,6 +156,7 @@ router.put('/hr-leave-requests/:id/approve', auth, authorize('admin'), async (re
     // Update leave request
     leave.status = 'Approved';
     leave.approvedBy = req.user.id;
+    leave.processedDate = new Date();
     if (comments) leave.comments = comments;
     
     await leave.save();
@@ -192,6 +194,7 @@ router.put('/hr-leave-requests/:id/reject', auth, authorize('admin'), async (req
     // Update leave request
     leave.status = 'Rejected';
     leave.approvedBy = req.user.id;
+    leave.processedDate = new Date();
     if (comments) leave.comments = comments;
     
     await leave.save();
@@ -228,13 +231,15 @@ router.get('/analytics/employees', auth, authorize('admin'), async (req, res) =>
     // Get total counts by department
     const departmentCounts = await User.aggregate([
       { $match: { role: 'employee' } },
-      { $group: { _id: '$department', count: { $sum: 1 } } }
+      { $group: { _id: '$department', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
     ]);
     
     // Get total counts by position
     const positionCounts = await User.aggregate([
       { $match: { role: 'employee' } },
-      { $group: { _id: '$position', count: { $sum: 1 } } }
+      { $group: { _id: '$position', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
     ]);
     
     // Get HR staff count
@@ -288,6 +293,32 @@ router.get('/analytics/tasks', auth, authorize('admin'), async (req, res) => {
       tasksByStatus,
       tasksByPriority,
       tasksByDepartment
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   GET /api/admin/user/:id
+// @desc    Get a specific user's details
+// @access  Private (Admin only)
+router.get('/user/:id', auth, authorize('admin'), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    let employeeData = null;
+    if (user.role === 'employee') {
+      employeeData = await Employee.findOne({ userId: user._id });
+    }
+    
+    res.json({
+      user,
+      employee: employeeData
     });
   } catch (error) {
     console.error(error);

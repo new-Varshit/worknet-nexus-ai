@@ -1,4 +1,3 @@
-
 const express = require('express');
 const Leave = require('../models/Leave');
 const User = require('../models/User');
@@ -25,12 +24,14 @@ router.get('/', auth, async (req, res) => {
       
       leaves = await Leave.find({ employee: { $in: employeeIds } })
         .populate('employee', 'name email department position')
-        .populate('approvedBy', 'name email');
+        .populate('approvedBy', 'name email')
+        .sort({ submittedDate: -1 });
     } else {
       // Employees can only see their own leave requests
       leaves = await Leave.find({ employee: req.user.id })
         .populate('employee', 'name email')
-        .populate('approvedBy', 'name email');
+        .populate('approvedBy', 'name email')
+        .sort({ submittedDate: -1 });
     }
     
     res.json(leaves);
@@ -110,7 +111,8 @@ router.post('/', auth, async (req, res) => {
       endDate,
       days: diffDays,
       reason,
-      status: 'Pending'
+      status: 'Pending',
+      submittedDate: new Date()
     });
 
     await leave.save();
@@ -153,6 +155,7 @@ router.put('/:id/approve', auth, authorize('admin', 'hr'), async (req, res) => {
     // Update leave request
     leave.status = 'Approved';
     leave.approvedBy = req.user.id;
+    leave.processedDate = new Date();
     if (comments) leave.comments = comments;
 
     await leave.save();
@@ -195,6 +198,7 @@ router.put('/:id/reject', auth, authorize('admin', 'hr'), async (req, res) => {
     // Update leave request
     leave.status = 'Rejected';
     leave.approvedBy = req.user.id;
+    leave.processedDate = new Date();
     if (comments) leave.comments = comments;
 
     await leave.save();
