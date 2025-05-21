@@ -1,73 +1,103 @@
-# Welcome to your Lovable project
 
-## Project info
+# Employment Management System (EMS)
 
-**URL**: https://lovable.dev/projects/1fb6b3fb-c96b-46c3-a321-ac59491a1a6e
+A comprehensive employment management system with features for HR, administrators and employees.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- Multi-role access (Admin, HR, Employee)
+- Employee management
+- Leave request management
+- Task management
+- Attendance tracking
+- Payroll system
+- Recruitment and job application processing
 
-**Use Lovable**
+## Technology Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1fb6b3fb-c96b-46c3-a321-ac59491a1a6e) and start prompting.
+- **Frontend:** React, TypeScript, Tailwind CSS, Shadcn UI
+- **Backend:** Node.js, Express
+- **Database:** MongoDB
 
-Changes made via Lovable will be committed automatically to this repo.
+## Getting Started
 
-**Use your preferred IDE**
+### Prerequisites
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Node.js (v16 or higher)
+- MongoDB (local or cloud instance)
+- npm or yarn
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Installation
 
-Follow these steps:
+1. Clone the repository
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+```bash
+git clone https://github.com/yourusername/employment-management-system.git
+cd employment-management-system
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. Install dependencies for both frontend and backend
 
-# Step 3: Install the necessary dependencies.
-npm i
+```bash
+# Install frontend dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Navigate to backend directory
+cd backend
+
+# Install backend dependencies
+npm install
+```
+
+3. Configure the environment variables
+
+```bash
+# In the backend directory, create a .env file with the following
+MONGODB_URI=mongodb://localhost:27017/worknet360
+JWT_SECRET=your_jwt_secret_key_should_be_secured
+PORT=5000
+```
+
+4. Start the backend server
+
+```bash
+# In the backend directory
+npm start
+```
+
+5. Start the frontend development server
+
+```bash
+# In the project root directory
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application should now be running at `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Default User Accounts
 
-**Use GitHub Codespaces**
+For testing purposes, the following accounts are available:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- **Admin:** admin@ems.com / admin123
+- **HR:** hr@ems.com / hr123
+- **Employee:** employee@ems.com / employee123
 
-## What technologies are used for this project?
+## Production Deployment
 
-This project is built with:
+For production deployment:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Build the frontend
 
-## How can I deploy this project?
+```bash
+npm run build
+```
 
-Simply open [Lovable](https://lovable.dev/projects/1fb6b3fb-c96b-46c3-a321-ac59491a1a6e) and click on Share -> Publish.
+2. Set up a production MongoDB database
 
-## Can I connect a custom domain to my Lovable project?
+3. Configure the backend for production by setting the appropriate environment variables
 
-Yes, you can!
+4. Deploy both the frontend and backend to your preferred hosting providers
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## License
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is licensed under the MIT License - see the LICENSE file for details.

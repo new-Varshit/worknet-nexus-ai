@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
+import { apiService } from '@/services/api';
 
 export type UserRole = 'admin' | 'hr' | 'employee';
 export type UserStatus = 'approved' | 'pending';
@@ -27,7 +28,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for demo purposes
+// Mock users for demo purposes - will be used as fallback if API is not available
 const MOCK_USERS = [
   {
     id: '1',
@@ -104,42 +105,90 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Check for existing session on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('worknet360_user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Failed to parse stored user', error);
-        localStorage.removeItem('worknet360_user');
+    const checkAuthStatus = async () => {
+      setIsLoading(true);
+      
+      const token = localStorage.getItem('worknet360_token');
+      if (!token) {
+        setIsLoading(false);
+        return;
       }
-    }
-    setIsLoading(false);
+      
+      try {
+        // Try to get user from API
+        const userData = await apiService.auth.getCurrentUser();
+        if (userData) {
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data', error);
+        // If API fails, check for stored user as fallback
+        const storedUser = localStorage.getItem('worknet360_user');
+        if (storedUser) {
+          try {
+            setUser(JSON.parse(storedUser));
+          } catch (error) {
+            console.error('Failed to parse stored user', error);
+            localStorage.removeItem('worknet360_user');
+            localStorage.removeItem('worknet360_token');
+          }
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuthStatus();
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     
-    // Simulate network request
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
-    
-    if (foundUser) {
-      // Remove password before storing
-      const { password: _, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem('worknet360_user', JSON.stringify(userWithoutPassword));
-      toast.success(`Welcome back, ${foundUser.name}!`);
-    } else {
-      toast.error("Invalid email or password");
-      throw new Error('Invalid credentials');
+    try {
+      // First try API login
+      const response = await apiService.auth.login(email, password);
+      
+      if (response && response.token && response.user) {
+        setUser(response.user);
+        localStorage.setItem('worknet360_token', response.token);
+        localStorage.setItem('worknet360_user', JSON.stringify(response.user));
+        toast.success(`Welcome back, ${response.user.name}!`);
+        return;
+      }
+    } catch (error) {
+      console.error('API Login failed, trying mock login', error);
+      
+      // If API is not available, fall back to mock login for development
+      // This will be removed in production
+      
+      // Simulate network request
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
+      
+      if (foundUser) {
+        // Remove password before storing
+        const { password: _, ...userWithoutPassword } = foundUser;
+        setUser(userWithoutPassword);
+        
+        // Store a fake token for development
+        const mockToken = `mock-token-${Date.now()}`;
+        localStorage.setItem('worknet360_token', mockToken);
+        localStorage.setItem('worknet360_user', JSON.stringify(userWithoutPassword));
+        
+        toast.success(`Welcome back, ${foundUser.name}! (Using mock login)`);
+      } else {
+        toast.error("Invalid email or password");
+        throw new Error('Invalid credentials');
+      }
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('worknet360_token');
     localStorage.removeItem('worknet360_user');
     toast.info("You've been logged out");
   };
