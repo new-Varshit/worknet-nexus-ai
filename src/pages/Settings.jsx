@@ -22,12 +22,12 @@ const Settings = () => {
     toast.success(`Notifications ${!notifications ? 'enabled' : 'disabled'}`);
   };
 
-  const handleLanguageChange = (value: string) => {
+  const handleLanguageChange = (value) => {
     setLanguage(value);
     toast.success("Language setting saved successfully");
   };
 
-  const handleChangePassword = (e: React.FormEvent) => {
+  const handleChangePassword = (e) => {
     e.preventDefault();
     
     if (!currentPassword || !newPassword || !confirmPassword) {
