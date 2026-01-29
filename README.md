@@ -32,7 +32,7 @@ A comprehensive employment management system with features for HR, administrator
 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/employment-management-system.git
+git clone https://github.com/new-Varshit/employment-management-system.git
 cd employment-management-system
 ```
 
@@ -62,7 +62,7 @@ PORT=5000
 
 ```bash
 # In the backend directory
-npm start
+npm run dev
 ```
 
 5. Start the frontend development server
